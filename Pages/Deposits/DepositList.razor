@@ -1,0 +1,41 @@
+﻿@page "/deposits"
+
+@using DepositManager.Data
+@using Microsoft.EntityFrameworkCore
+
+@inject DepositServices depositService
+@inject BankServices bankService
+@inject NavigationManager NavigationManager
+
+<h3>DepositList</h3>
+<SfGrid DataSource="deposits">
+    <GridEvents OnRecordDoubleClick="DoubleClickHandler" TValue="Deposit" ></GridEvents>
+    <GridColumns>
+        <GridColumn Field="@nameof(Deposit.Date)" HeaderText="Deposit Date" ></GridColumn>
+        <GridForeignColumn Field="@nameof(Deposit.BankId)" ForeignKeyValue="BankName" ForeignDataSource="@banks"></GridForeignColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    public IEnumerable<Deposit> deposits { get; set; }
+    public IEnumerable<Bank> banks { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshDeposits();
+        banks = await bankService.GetBanksAsync();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task RefreshDeposits()
+    {
+        deposits = await depositService.GetDepositsAsync();
+    }
+    # region DataGrid action handlers
+    public void DoubleClickHandler(RecordDoubleClickEventArgs<Deposit> args)
+    {
+        string depositId = args.RowData.DepositId.ToString();
+        NavigationManager.NavigateTo($"/deposit/{depositId}");
+    }
+    #endregion
+}

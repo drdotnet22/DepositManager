@@ -1,0 +1,93 @@
+﻿@page "/deposit/{depositId}"
+
+@inherits LayoutComponentBase
+
+@using DepositManager.Data
+@using Microsoft.EntityFrameworkCore
+
+@inject DepositServices depositService
+@inject CheckServices checkService
+@inject BankServices bankService
+@inject SfDialogService DialogService
+@inject NavigationManager NavigationManager
+
+
+<SfDatePicker @bind-Value="deposit.Date" Placeholder="Date" FloatLabelType="FloatLabelType.Always"></SfDatePicker>
+<SfTextBox @bind-Value="deposit.Bank.BankName" Placeholder="Bank" FloatLabelType="FloatLabelType.Always" Readonly="true"></SfTextBox>
+<SfNumericTextBox TValue="decimal?" @bind-Value="deposit.Cash" Placeholder="Cash" FloatLabelType="FloatLabelType.Always" ShowSpinButton="false"></SfNumericTextBox>
+<SfNumericTextBox TValue="decimal" @bind-Value="depositTotal" Placeholder="Deposit Total" FloatLabelType="FloatLabelType.Always" Readonly="true" ShowSpinButton="false"></SfNumericTextBox>
+
+<SfGrid DataSource="checksInDeposit" AllowSorting="true">
+    <GridEvents TValue="Check" CommandClicked="CommandClickedHandler" ></GridEvents>
+    <GridSortSettings>
+        <GridSortColumns>
+            <GridSortColumn Field="Amount" Direction="SortDirection.Ascending"></GridSortColumn>
+        </GridSortColumns>
+    </GridSortSettings>
+    <GridColumns>
+        <GridColumn Field="@nameof(Check.CustomerName)" HeaderText="Customer Name"></GridColumn>
+        <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number" Format="###"></GridColumn>
+        <GridColumn Field="@nameof(Check.Amount)" HeaderText="Amount" Format="C2"></GridColumn>
+        <GridColumn>
+            <GridCommandColumns>
+                <GridCommandColumn Type="CommandButtonType.None" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-link-remove", CssClass="e-flat" })"></GridCommandColumn>
+                <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-delete", CssClass="e-flat" })" ></GridCommandColumn>
+            </GridCommandColumns>
+        </GridColumn>
+    </GridColumns>
+</SfGrid>
+
+<SfButton @onclick="DeleteDeposit" CssClass="e-danger" >Delete Deposit</SfButton>
+
+
+
+@code {
+    [Parameter]
+    public string? depositId { get; set; }
+
+    public Deposit deposit;
+    public IEnumerable<Check> checksInDeposit;
+    public decimal depositTotal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        deposit = await depositService.GetDepositByIdAsync(depositId);
+        await RefreshChecks();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task RefreshChecks()
+    {
+        checksInDeposit = await checkService.GetChecksInDepositAsync(deposit);
+        depositTotal = await depositService.GetDepositTotalAsync(deposit);
+    }
+
+    public async void CommandClickedHandler(CommandClickEventArgs<Check> args)
+    {
+        if (args.CommandColumn.Type == CommandButtonType.Delete)
+        {
+            bool isConfirm = await DialogService.ConfirmAsync("Are you sure you want to permanently delete this check?", "Delete Check");
+            if (isConfirm)
+            {
+                checkService.DeleteCheckAsync(args.RowData);
+                RefreshChecks();
+            }
+        }
+        else if (args.CommandColumn.Type == CommandButtonType.None)
+        {
+            args.RowData.Deposit = null;
+            checkService.UpdateCheckAsync(args.RowData);
+            RefreshChecks();
+        }
+    }
+
+    private async Task DeleteDeposit()
+    {
+        bool isConfirm = await DialogService.ConfirmAsync("Are you sure you want to permanently delete this deposit? All checks assigned to it will be unlinked and will be available for other deposits.", "Delete Delete");
+        if (isConfirm)
+        {
+            depositService.DeleteDepositAsync(deposit);
+            NavigationManager.NavigateTo("/deposits");
+        }
+    }
+}

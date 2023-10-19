@@ -1,0 +1,126 @@
+﻿@inherits LayoutComponentBase
+
+@using DepositManager.Data
+@using Microsoft.EntityFrameworkCore
+
+@inject CheckServices checkService
+@inject MyDbContext dbContext
+@inject NavigationManager NavigationManager
+@inject SfDialogService DialogService
+
+<SfNumericTextBox Format="C2" @bind-Value="selectedChecksTotal" ShowSpinButton="false" Readonly="true" Placeholder="Total value of selected checks" FloatLabelType="FloatLabelType.Always"></SfNumericTextBox>
+
+<SfGrid @ref="Grid" DataSource="@checks" Toolbar="@(new List<string>() { "Edit", "Update", "Cancel" })" AllowSelection="true" AllowSorting="true" RowHeight="30">
+    <GridSelectionSettings AllowDragSelection="true" Type="Syncfusion.Blazor.Grids.SelectionType.Multiple"
+                           Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
+    <GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true"></GridEditSettings>
+    <GridEvents OnActionBegin="ActionBeginHandler" TValue="Check"
+                RowSelected="GetSelectedCheckAmountTotal" RowDeselected="GetSelectedCheckAmountTotal"></GridEvents>
+    <GridColumns>
+        <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+        <GridColumn Field="@nameof(Check.CustomerName)" HeaderText="Customer"></GridColumn>
+        <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number"></GridColumn>
+        <GridColumn Field="@nameof(Check.Amount)" Format="C2" HeaderText="Check Amount"></GridColumn>
+        <GridColumn>
+            <GridCommandColumns>
+                <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-delete", CssClass="e-flat" })"></GridCommandColumn>
+            </GridCommandColumns>
+        </GridColumn>
+    </GridColumns>
+    <GridAggregates>
+        <GridAggregate>
+            <GridAggregateColumns>
+                <GridAggregateColumn Field="@nameof(Check.ReferenceNum)" Type="AggregateType.Count">
+                    <FooterTemplate>
+                        @{
+                            var CountValue = (context as AggregateTemplateContext);
+                            <div>
+                                Number of checks: @CountValue.Count
+                            </div>
+                        }
+                    </FooterTemplate>
+                </GridAggregateColumn>
+                <GridAggregateColumn Field="@nameof(Check.Amount)" Type="AggregateType.Sum" Format="C2">
+                    <FooterTemplate>
+                        @{
+                            var SumValue = (context as AggregateTemplateContext);
+                            <div>
+                                Sum: @SumValue.Sum
+                            </div>
+                        }
+                    </FooterTemplate>
+                </GridAggregateColumn>
+            </GridAggregateColumns>
+        </GridAggregate>
+    </GridAggregates>
+</SfGrid>
+
+@code {
+    public SfGrid<Check> Grid { get; set; }
+    public IEnumerable<Check> checks { get; set; }
+    public IList<Check> SelectedChecks { get; set; }
+    decimal selectedChecksTotal = 0m;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshChecks();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task RefreshChecks()
+    {
+        checks = await checkService.GetChecksAsync();
+        checks = checks.Where(c => c.Deposit == null);
+    }
+
+
+
+    #region DataGrid handlers
+    private void ActionBeginHandler(ActionEventArgs<Check> Args)
+    {
+        if (Args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save))
+        {
+            if (Args.Action == "Edit")
+            {
+                checkService.UpdateCheck(Args.Data);
+                RefreshChecks();
+            }
+        }
+        if (Args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
+        {
+            checkService.DeleteCheckAsync(Args.Data);
+            RefreshChecks();
+        }
+    }
+    private void ActionCompleteHandler(ActionEventArgs<Check> Args)
+    {
+        
+    }
+
+    public async void CommandClickedHandler(CommandClickEventArgs<Check> args)
+    {
+        if (args.CommandColumn.Type == CommandButtonType.Delete)
+        {
+            checkService.DeleteCheckAsync(args.RowData);
+            RefreshChecks();
+        }
+    }
+    #endregion
+
+
+    private async Task GetSelectedCheckAmountTotal()
+    {
+        decimal total = 0m;
+        SelectedChecks = await Grid.GetSelectedRecordsAsync();
+        if (SelectedChecks?.Count > 0)
+        {
+            foreach (var check in SelectedChecks)
+            {
+                total = total + check.Amount;
+            }
+        }
+        selectedChecksTotal = total;
+    }
+
+    
+}

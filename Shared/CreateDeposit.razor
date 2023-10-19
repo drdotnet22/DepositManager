@@ -1,0 +1,48 @@
+﻿@using DepositManager.Data
+@using Microsoft.EntityFrameworkCore
+
+@inject DepositServices depositService
+@inject CheckServices checkService
+@inject BankServices bankService
+@inject NavigationManager NavigationManager
+
+<h3>CreateDeposit</h3>
+
+<SfAutoComplete TValue="Bank" TItem="Bank" Placeholder="Bank name" FloatLabelType="FloatLabelType.Auto"
+    DataSource="banks" @bind-Value="newDeposit.Bank" Autofill="true">
+    <AutoCompleteFieldSettings Value="BankName" />
+</SfAutoComplete>
+<SfNumericTextBox TValue="decimal?" @bind-Value="newDeposit.Cash" Placeholder="Cash" ShowSpinButton="false"></SfNumericTextBox>
+<SfDatePicker @bind-Value="newDeposit.Date" ></SfDatePicker>
+<SfButton @onclick="SaveNewDeposit" IsPrimary="true">Save</SfButton>
+
+@code {
+    private Deposit newDeposit { get; set; } = new Deposit();
+    public IEnumerable<Bank> banks { get; set; }
+
+    [CascadingParameter]
+    protected IEnumerable<Check> selectedChecks { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnClick { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        banks = await bankService.GetBanksAsync();
+        newDeposit.Date = DateOnly.FromDateTime(DateTime.Now);
+        await base.OnInitializedAsync();
+    }
+
+    private async Task SaveNewDeposit()
+    {
+        await depositService.AddDepositAsync(newDeposit);
+        foreach (var check in selectedChecks)
+        {
+            check.Deposit = newDeposit;
+            checkService.UpdateCheckAsync(check);
+        }
+        await OnClick.InvokeAsync("CloseDialog");
+        string newDepositId = newDeposit.DepositId.ToString();
+        NavigationManager.NavigateTo("/deposit/" + newDepositId);
+    }
+}

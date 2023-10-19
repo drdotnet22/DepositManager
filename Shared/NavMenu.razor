@@ -1,0 +1,23 @@
+﻿<div>
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <i class="fa-solid fa-money-check-dollar"></i>&nbsp;&nbsp;Available Checks
+            </NavLink>
+            <NavLink class="nav-link" href="/deposits" Match="NavLinkMatch.All">
+                <i class="fa-solid fa-building-columns"></i>&nbsp;&nbsp;Deposits
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}
