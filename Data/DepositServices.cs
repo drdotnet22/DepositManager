@@ -144,8 +144,8 @@ namespace DepositManager.Data
             //cash info
             if (deposit.Cash != null)
             {
-                depositTicketDictionary.Add("cash1", deposit.Cash.ToString());
-                depositTicketDictionary.Add("cash2", deposit.Cash.ToString());
+                depositTicketDictionary.Add("cash1", deposit.Cash?.ToString("N2"));
+                depositTicketDictionary.Add("cash2", deposit.Cash?.ToString("N2"));
             }
             //check info
             int ckCount = 0;
@@ -156,8 +156,8 @@ namespace DepositManager.Data
                 depositTicketDictionary.Add("id1ck" + ckCount.ToString(), ckCount.ToString());
                 depositTicketDictionary.Add("id2ck" + ckCount.ToString(), ckCount.ToString());
                 //check amount
-                depositTicketDictionary.Add("amt1ck" + ckCount.ToString(), check.Amount.ToString());
-                depositTicketDictionary.Add("amt2ck" + ckCount.ToString(), check.Amount.ToString());
+                depositTicketDictionary.Add("amt1ck" + ckCount.ToString(), check.Amount.ToString("N2"));
+                depositTicketDictionary.Add("amt2ck" + ckCount.ToString(), check.Amount.ToString("N2"));
                 //customer name
                 depositTicketDictionary.Add("custname" + ckCount.ToString(), check.CustomerName);
                 //reference number
@@ -166,8 +166,8 @@ namespace DepositManager.Data
             depositTicketDictionary.Add("ckNum1", checksInDeposit.Count.ToString());
             //deposit total
             decimal depositTotal = await GetDepositTotalAsync(deposit);
-            depositTicketDictionary.Add("Total1", depositTotal.ToString());
-            depositTicketDictionary.Add("total2", depositTotal.ToString());
+            depositTicketDictionary.Add("Total1", depositTotal.ToString("N2"));
+            depositTicketDictionary.Add("total2", depositTotal.ToString("N2"));
 
             return depositTicketDictionary;
         }
