@@ -39,8 +39,10 @@
 
 <SfButton @onclick="DeleteDeposit" CssClass="e-danger" >Delete Deposit</SfButton>
 
-
-
+<SfPdfViewer2 DocumentPath="https://cdn.syncfusion.com/content/pdf/pdf-succinctly.pdf"
+              Height="100%"
+              Width="100%">
+</SfPdfViewer2>
 @code {
     [Parameter]
     public string? depositId { get; set; }
