@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Xml.Linq;
+using System.Collections.Generic;
 
 namespace DepositManager.Data
 {
@@ -129,6 +130,46 @@ namespace DepositManager.Data
             {
                 throw;
             }
+        }
+
+        /// <param name="deposit"></param>
+        /// <returns></returns>
+        public async Task<Dictionary<string, string>> CreateDepositTicketAsync(Deposit deposit)
+        {
+            Dictionary<string, string> depositTicketDictionary = new Dictionary<string, string>();
+            IList<Check> checksInDeposit = await dbContext.Check.Where(d => d.Deposit == deposit).ToListAsync();
+            //date
+            depositTicketDictionary.Add("date1", deposit.Date.ToString());
+            depositTicketDictionary.Add("date2", deposit.Date.ToString());
+            //cash info
+            if (deposit.Cash != null)
+            {
+                depositTicketDictionary.Add("cash1", deposit.Cash.ToString());
+                depositTicketDictionary.Add("cash2", deposit.Cash.ToString());
+            }
+            //check info
+            int ckCount = 0;
+            foreach (Check check in checksInDeposit)
+            {
+                ckCount++;
+                //id of check
+                depositTicketDictionary.Add("id1ck" + ckCount.ToString(), ckCount.ToString());
+                depositTicketDictionary.Add("id2ck" + ckCount.ToString(), ckCount.ToString());
+                //check amount
+                depositTicketDictionary.Add("amt1ck" + ckCount.ToString(), check.Amount.ToString());
+                depositTicketDictionary.Add("amt2ck" + ckCount.ToString(), check.Amount.ToString());
+                //customer name
+                depositTicketDictionary.Add("custname" + ckCount.ToString(), check.CustomerName);
+                //reference number
+                depositTicketDictionary.Add("refnum" + ckCount.ToString(), check.ReferenceNum.ToString());
+            }
+            depositTicketDictionary.Add("ckNum1", checksInDeposit.Count.ToString());
+            //deposit total
+            decimal depositTotal = await GetDepositTotalAsync(deposit);
+            depositTicketDictionary.Add("Total1", depositTotal.ToString());
+            depositTicketDictionary.Add("total2", depositTotal.ToString());
+
+            return depositTicketDictionary;
         }
         #endregion
     }

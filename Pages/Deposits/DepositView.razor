@@ -39,10 +39,9 @@
 
 <SfButton @onclick="DeleteDeposit" CssClass="e-danger" >Delete Deposit</SfButton>
 
-<SfPdfViewer2 DocumentPath="https://cdn.syncfusion.com/content/pdf/pdf-succinctly.pdf"
-              Height="100%"
-              Width="100%">
-</SfPdfViewer2>
+<CascadingValue Value="deposit">
+    <DepositTicket />
+</CascadingValue>
 @code {
     [Parameter]
     public string? depositId { get; set; }
@@ -50,6 +49,7 @@
     public Deposit deposit;
     public IEnumerable<Check> checksInDeposit;
     public decimal depositTotal;
+    
 
     protected override async Task OnInitializedAsync()
     {
@@ -92,4 +92,6 @@
             NavigationManager.NavigateTo("/deposits");
         }
     }
+
+    
 }
