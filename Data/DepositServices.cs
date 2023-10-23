@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Xml.Linq;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 
 namespace DepositManager.Data
 {
@@ -171,65 +170,6 @@ namespace DepositManager.Data
             depositTicketDictionary.Add("total2", depositTotal.ToString("N2"));
 
             return depositTicketDictionary;
-        }
-
-        public async Task<JArray> CreateDepositTicketArrayAsync(Deposit deposit)
-        {
-            JArray depositTicketArray = new JArray();
-
-            IList<Check> checksInDeposit = await dbContext.Check.Where(d => d.Deposit == deposit).ToListAsync();
-
-            // Common data for all items
-            JObject commonData = new JObject
-            {
-                { "date1", deposit.Date.ToString() },
-                { "date2", deposit.Date.ToString() }
-            };
-
-            if (deposit.Cash != null)
-            {
-                commonData.Add("cash1", deposit.Cash?.ToString("N2"));
-                commonData.Add("cash2", deposit.Cash?.ToString("N2"));
-            }
-
-            depositTicketArray.Add(commonData);
-
-            int ckCount = 0;
-            foreach (Check check in checksInDeposit)
-            {
-                ckCount++;
-
-                // Create an object for each check
-                JObject checkData = new JObject
-                {
-                    { "id1ck" + ckCount.ToString(), ckCount },
-                    { "id2ck" + ckCount.ToString(), ckCount },
-                    { "amt1ck" + ckCount.ToString(), check.Amount.ToString("N2") },
-                    { "amt2ck" + ckCount.ToString(), check.Amount.ToString("N2") },
-                    { "custname" + ckCount.ToString(), check.CustomerName },
-                    { "refnum" + ckCount.ToString(), check.ReferenceNum }
-                };
-
-                depositTicketArray.Add(checkData);
-            }
-
-            // Add the count of checks
-            JObject checkCount = new JObject
-            {
-                { "ckNum1", checksInDeposit.Count }
-            };
-            depositTicketArray.Add(checkCount);
-
-            // Add deposit total
-            decimal depositTotal = await GetDepositTotalAsync(deposit);
-            JObject depositTotalData = new JObject
-            {
-                { "Total1", depositTotal.ToString("N2") },
-                { "total2", depositTotal.ToString("N2") }
-            };
-            depositTicketArray.Add(depositTotalData);
-
-            return depositTicketArray;
         }
         #endregion
     }

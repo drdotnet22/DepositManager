@@ -12,36 +12,56 @@
 @inject NavigationManager NavigationManager
 
 
-<SfDatePicker @bind-Value="deposit.Date" Placeholder="Date" FloatLabelType="FloatLabelType.Always"></SfDatePicker>
-<SfTextBox @bind-Value="deposit.Bank.BankName" Placeholder="Bank" FloatLabelType="FloatLabelType.Always" Readonly="true"></SfTextBox>
-<SfNumericTextBox TValue="decimal?" @bind-Value="deposit.Cash" Placeholder="Cash" FloatLabelType="FloatLabelType.Always" ShowSpinButton="false"></SfNumericTextBox>
-<SfNumericTextBox TValue="decimal" @bind-Value="depositTotal" Placeholder="Deposit Total" FloatLabelType="FloatLabelType.Always" Readonly="true" ShowSpinButton="false"></SfNumericTextBox>
-
-<SfGrid DataSource="checksInDeposit" AllowSorting="true">
-    <GridEvents TValue="Check" CommandClicked="CommandClickedHandler" ></GridEvents>
-    <GridSortSettings>
-        <GridSortColumns>
-            <GridSortColumn Field="Amount" Direction="SortDirection.Ascending"></GridSortColumn>
-        </GridSortColumns>
-    </GridSortSettings>
-    <GridColumns>
-        <GridColumn Field="@nameof(Check.CustomerName)" HeaderText="Customer Name"></GridColumn>
-        <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number" Format="###"></GridColumn>
-        <GridColumn Field="@nameof(Check.Amount)" HeaderText="Amount" Format="C2"></GridColumn>
-        @if (deposit.DepositStatus != true)
-        {
-            <GridColumn>
-                <GridCommandColumns>
-                    <GridCommandColumn Type="CommandButtonType.None" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-link-remove", CssClass="e-flat" })"></GridCommandColumn>
-                    <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-delete", CssClass="e-flat" })"></GridCommandColumn>
-                </GridCommandColumns>
-            </GridColumn>
-        }
-    </GridColumns>
-</SfGrid>
-
-<SfButton @onclick="DeleteDeposit" CssClass="e-danger" >Delete Deposit</SfButton>
-<SfButton @onclick="OpenDepositTicketDialog">Open Deposit Ticket</SfButton>
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
+                <SfDatePicker @bind-Value="deposit.Date" Placeholder="Date" FloatLabelType="FloatLabelType.Always"></SfDatePicker>
+            </div>
+            <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
+                <SfTextBox @bind-Value="deposit.Bank.BankName" Placeholder="Bank" FloatLabelType="FloatLabelType.Always" Readonly="true"></SfTextBox>
+            </div>
+            <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
+                <SfNumericTextBox TValue="decimal?" @bind-Value="deposit.Cash" Placeholder="Cash" FloatLabelType="FloatLabelType.Always" ShowSpinButton="false"></SfNumericTextBox>
+            </div>
+            <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
+                <SfNumericTextBox TValue="decimal" @bind-Value="depositTotal" Placeholder="Deposit Total" FloatLabelType="FloatLabelType.Always" Readonly="true" ShowSpinButton="false"></SfNumericTextBox>
+            </div>
+        </div>
+        <div class="row">
+            <div>
+                <SfGrid DataSource="checksInDeposit" AllowSorting="true">
+                    <GridEvents TValue="Check" CommandClicked="CommandClickedHandler"></GridEvents>
+                    <GridSortSettings>
+                        <GridSortColumns>
+                            <GridSortColumn Field="Amount" Direction="SortDirection.Ascending"></GridSortColumn>
+                        </GridSortColumns>
+                    </GridSortSettings>
+                    <GridColumns>
+                        <GridColumn Field="@nameof(Check.CustomerName)" HeaderText="Customer Name"></GridColumn>
+                        <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number" Format="###"></GridColumn>
+                        <GridColumn Field="@nameof(Check.Amount)" HeaderText="Amount" Format="C2"></GridColumn>
+                        @if (deposit.DepositStatus != true)
+                        {
+                            <GridColumn>
+                                <GridCommandColumns>
+                                    <GridCommandColumn Type="CommandButtonType.None" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-link-remove", CssClass="e-flat" })"></GridCommandColumn>
+                                    <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-delete", CssClass="e-flat" })"></GridCommandColumn>
+                                </GridCommandColumns>
+                            </GridColumn>
+                        }
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+        <div class="row">
+            <div>
+                <SfButton @onclick="DeleteDeposit" CssClass="e-danger">Delete Deposit</SfButton>
+                <SfButton @onclick="OpenDepositTicketDialog">Open Deposit Ticket</SfButton>
+            </div>
+        </div>
+    </div>
+</div>
 
 <SfDialog ShowCloseIcon="true" @bind-Visible="depositTicketDialogVisible" AllowPrerender="false">
     <DialogTemplates>
@@ -54,6 +74,71 @@
     </DialogTemplates>
 </SfDialog>
 
+<style>
+    .content-wrapper {
+        width: 95%;
+        margin: 0 auto;
+        min-width: 85px;
+    }
+
+    b.example-label {
+        font-size: 14px;
+    }
+
+    .content-wrapper div.row {
+        padding: 15px 0px;
+    }
+
+    .small-textbox {
+        padding-top: 5px;
+    }
+
+    .tailwind .small-textbox,
+    .tailwind-dark .small-textbox {
+        padding-top: 3px;
+    }
+
+    .e-bigger .small-textbox {
+        padding-top: 10px;
+    }
+
+    .tailwind .e-bigger .small-textbox,
+    .tailwind-dark .e-bigger .small-textbox {
+        padding-top: 1px;
+    }
+
+    @@media only screen and (max-width: 480px) {
+        .content-wrapper {
+            width: 92%;
+        }
+
+        .col-xs-6,
+        .col-xs-4,
+        .col-xs-12 {
+            padding: 10px 5px;
+            width: 100%;
+        }
+
+        .content-wrapper div.row {
+            padding: 0px;
+        }
+    }
+
+    .fabric .row.material,
+    .bootstrap .row.material,
+    .bootstrap4 .row.material,
+    .bootstrap5 .row.material,
+    .highcontrast .row.material,
+    .tailwind .row.material,
+    .fluent .row.material,
+    .fabric-dark .row.material,
+    .bootstrap-dark .row.material,
+    .bootstrap5-dark .row.material,
+    .tailwind-dark .row.material,
+    .fluent-dark .row.material {
+        display: none;
+    }
+</style>
 
 @code {
     [Parameter]

@@ -11,12 +11,21 @@
 @inject SfDialogService DialogService
 
 <PageTitle>Checks</PageTitle>
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+            <h3>Unnassigned Checks</h3>
+        <div class="row">
+            <div>
+                <SfButton @onclick="AddCheck">Add checks</SfButton>
+                <SfButton @onclick="OpenNewDepositDialog">Create new deposit with selected checks</SfButton>
+            </div>
+        </div>
+        <div class="row">
+            <UnassignedChecks @ref="unassignedChecks" />
+        </div>
+    </div>
+</div>
 
-<h1>Checks</h1>
-<SfButton @onclick="AddCheck">Add checks</SfButton>
-<SfButton @onclick="OpenNewDepositDialog">Create new deposit with selected checks</SfButton>
-
-<UnassignedChecks @ref="unassignedChecks" />
 
 <SfDialog ShowCloseIcon="true" @bind-Visible="depositDialogVisible" AllowPrerender="false">
     <DialogTemplates>
@@ -89,6 +98,16 @@
 
     #toast_types {
         text-align: center;
+    }
+
+    .content-wrapper {
+        width: 95%;
+        margin: 0 auto;
+        min-width: 85px;
+    }
+
+    .content-wrapper div.row {
+        padding: 15px 0px;
     }
 </style>
 
