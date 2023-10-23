@@ -4,16 +4,10 @@
 @using Microsoft.EntityFrameworkCore
 
 @inject DepositServices depositService
+
 <div class="control-section">
-    <SfButton OnClick="@OnImportFormFieldsClick">Create Deposit Ticket</SfButton>
-    @if (depositTicketFormFields != null)
-    {
-        
-    }
     <SfPdfViewer2 @ref="@depositTicketViewer"
-                  DocumentPath="@depositFormPath"
-                  Height="100%"
-                  Width="100%">
+                  DocumentPath="@depositFormPath">
     </SfPdfViewer2>
 </div>
 
@@ -25,10 +19,19 @@
     SfPdfViewer2 depositTicketViewer;
     public string depositFormPath { get; set; } = "wwwroot/Data/deposit_form.pdf";
 
-    public async void OnImportFormFieldsClick(MouseEventArgs args)
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        // Import the form field data from the dictionary into the current PDF document.
+        if (firstRender)
+        {
+            OnImportFormFieldsClick();
+        }
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    public async void OnImportFormFieldsClick()
+    {
         depositTicketFormFields = await depositService.CreateDepositTicketAsync(deposit);
         await depositTicketViewer.ImportFormFieldsAsync(depositTicketFormFields);
     }
+
 }

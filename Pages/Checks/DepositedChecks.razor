@@ -1,0 +1,51 @@
+﻿
+@inherits LayoutComponentBase
+
+@using DepositManager.Data
+@using Microsoft.EntityFrameworkCore
+
+@inject CheckServices checkService
+@inject NavigationManager NavigationManager
+
+<h3>DepositedChecks</h3>
+
+<SfGrid @ref="Grid" DataSource="@checks" AllowSorting="true" AllowFiltering="true" RowHeight="30">
+    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+    <GridColumns>
+        <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+        <GridColumn Field="@nameof(Check.CustomerName)" HeaderText="Customer"></GridColumn>
+        <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number"></GridColumn>
+        <GridColumn Field="@nameof(Check.Amount)" Format="C2" HeaderText="Check Amount"></GridColumn>
+        <GridColumn>
+            <GridCommandColumns>
+                <GridCommandColumn Type="CommandButtonType.None" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-open-link", CssClass="e-flat" })"></GridCommandColumn>
+            </GridCommandColumns>
+        </GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    public SfGrid<Check> Grid { get; set; }
+    public IEnumerable<Check> checks { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshChecks();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task RefreshChecks()
+    {
+        checks = await checkService.GetChecksAsync();
+        checks = checks.Where(c => c.Deposit != null);
+    }
+
+    public async void CommandClickedHandler(CommandClickEventArgs<Check> args)
+    {
+        if (args.CommandColumn.Type == CommandButtonType.None)
+        {
+            string depositId = args.RowData.DepositId.ToString();
+            NavigationManager.NavigateTo("/deposit/" + depositId);
+        }
+    }
+}

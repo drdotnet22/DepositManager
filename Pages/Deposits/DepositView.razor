@@ -28,20 +28,33 @@
         <GridColumn Field="@nameof(Check.CustomerName)" HeaderText="Customer Name"></GridColumn>
         <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number" Format="###"></GridColumn>
         <GridColumn Field="@nameof(Check.Amount)" HeaderText="Amount" Format="C2"></GridColumn>
-        <GridColumn>
-            <GridCommandColumns>
-                <GridCommandColumn Type="CommandButtonType.None" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-link-remove", CssClass="e-flat" })"></GridCommandColumn>
-                <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-delete", CssClass="e-flat" })" ></GridCommandColumn>
-            </GridCommandColumns>
-        </GridColumn>
+        @if (deposit.DepositStatus != true)
+        {
+            <GridColumn>
+                <GridCommandColumns>
+                    <GridCommandColumn Type="CommandButtonType.None" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-link-remove", CssClass="e-flat" })"></GridCommandColumn>
+                    <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-delete", CssClass="e-flat" })"></GridCommandColumn>
+                </GridCommandColumns>
+            </GridColumn>
+        }
     </GridColumns>
 </SfGrid>
 
 <SfButton @onclick="DeleteDeposit" CssClass="e-danger" >Delete Deposit</SfButton>
+<SfButton @onclick="OpenDepositTicketDialog">Open Deposit Ticket</SfButton>
 
-<CascadingValue Value="deposit">
-    <DepositTicket />
-</CascadingValue>
+<SfDialog ShowCloseIcon="true" @bind-Visible="depositTicketDialogVisible" AllowPrerender="false">
+    <DialogTemplates>
+        <Header>Deposit Ticket</Header>
+        <Content>
+            <CascadingValue Value="deposit">
+                <DepositTicket/>
+            </CascadingValue>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+
 @code {
     [Parameter]
     public string? depositId { get; set; }
@@ -49,7 +62,7 @@
     public Deposit deposit;
     public IEnumerable<Check> checksInDeposit;
     public decimal depositTotal;
-    
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,5 +106,13 @@
         }
     }
 
-    
+    #region Dialog
+    public bool depositTicketDialogVisible = false;
+    public async Task OpenDepositTicketDialog()
+    {
+        deposit.DepositStatus = true;
+        await depositService.UpdateDepositAsync(deposit);
+        this.depositTicketDialogVisible = true;
+    }
+    #endregion
 }

@@ -61,16 +61,18 @@
     public IList<Check> SelectedChecks { get; set; }
     decimal selectedChecksTotal = 0m;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await RefreshChecks();
-        await base.OnInitializedAsync();
+        if (firstRender)
+        {
+            await RefreshChecks();
+            await base.OnAfterRenderAsync(firstRender);
+        }
     }
 
     private async Task RefreshChecks()
     {
-        checks = await checkService.GetChecksAsync();
-        checks = checks.Where(c => c.Deposit == null);
+        checks = await checkService.GetChecksInDepositAsync(null);
     }
 
 

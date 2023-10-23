@@ -30,6 +30,7 @@
     {
         banks = await bankService.GetBanksAsync();
         newDeposit.Date = DateOnly.FromDateTime(DateTime.Now);
+        newDeposit.DepositStatus = false;
         await base.OnInitializedAsync();
     }
 
