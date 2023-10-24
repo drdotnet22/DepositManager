@@ -32,6 +32,7 @@
     {
         depositTicketFormFields = await depositService.CreateDepositTicketAsync(deposit);
         await depositTicketViewer.ImportFormFieldsAsync(depositTicketFormFields);
+        InvokeAsync(() => StateHasChanged());
     }
 
 }

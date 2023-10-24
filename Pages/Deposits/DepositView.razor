@@ -56,7 +56,10 @@
         </div>
         <div class="row">
             <div>
-                <SfButton @onclick="DeleteDeposit" CssClass="e-danger">Delete Deposit</SfButton>
+                @if (!deposit.DepositStatus)
+                {
+                    <SfButton @onclick="DeleteDeposit" CssClass="e-danger">Delete Deposit</SfButton>
+                }
                 <SfButton @onclick="OpenDepositTicketDialog">Open Deposit Ticket</SfButton>
             </div>
         </div>

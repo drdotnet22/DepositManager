@@ -70,21 +70,16 @@
     public IList<Check> SelectedChecks { get; set; }
     decimal selectedChecksTotal = 0m;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
-        {
-            await RefreshChecks();
-            await base.OnAfterRenderAsync(firstRender);
-        }
+        await RefreshChecks();
+        await base.OnInitializedAsync();
     }
 
     private async Task RefreshChecks()
     {
         checks = await checkService.GetChecksInDepositAsync(null);
     }
-
-
 
     #region DataGrid handlers
     private void ActionBeginHandler(ActionEventArgs<Check> Args)
@@ -132,6 +127,4 @@
         }
         selectedChecksTotal = total;
     }
-
-    
 }

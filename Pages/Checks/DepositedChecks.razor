@@ -1,4 +1,5 @@
-﻿
+﻿@page "/pastchecks"
+
 @inherits LayoutComponentBase
 
 @using DepositManager.Data
@@ -11,12 +12,13 @@
 
 <SfGrid @ref="Grid" DataSource="@checks" AllowSorting="true" AllowFiltering="true" RowHeight="30">
     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+    <GridEvents TValue="Check" CommandClicked="CommandClickedHandler"></GridEvents>
     <GridColumns>
         <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
         <GridColumn Field="@nameof(Check.CustomerName)" HeaderText="Customer"></GridColumn>
         <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number"></GridColumn>
         <GridColumn Field="@nameof(Check.Amount)" Format="C2" HeaderText="Check Amount"></GridColumn>
-        <GridColumn>
+        <GridColumn HeaderText="Go to deposit">
             <GridCommandColumns>
                 <GridCommandColumn Type="CommandButtonType.None" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-open-link", CssClass="e-flat" })"></GridCommandColumn>
             </GridCommandColumns>
