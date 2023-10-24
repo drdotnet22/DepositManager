@@ -8,6 +8,7 @@
 <div class="control-section">
     <SfPdfViewer2 @ref="@depositTicketViewer"
                   DocumentPath="@depositFormPath">
+        <PdfViewerEvents DocumentLoaded="DocumentLoader" ></PdfViewerEvents>
     </SfPdfViewer2>
 </div>
 
@@ -19,20 +20,10 @@
     SfPdfViewer2 depositTicketViewer;
     public string depositFormPath { get; set; } = "wwwroot/Data/deposit_form.pdf";
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            OnImportFormFieldsClick();
-        }
-        return base.OnAfterRenderAsync(firstRender);
-    }
-
-    public async void OnImportFormFieldsClick()
+    public async void DocumentLoader()
     {
         depositTicketFormFields = await depositService.CreateDepositTicketAsync(deposit);
         await depositTicketViewer.ImportFormFieldsAsync(depositTicketFormFields);
-        InvokeAsync(() => StateHasChanged());
     }
 
 }
