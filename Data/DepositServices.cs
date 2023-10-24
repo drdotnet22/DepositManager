@@ -169,6 +169,8 @@ namespace DepositManager.Data
             depositTicketDictionary.Add("Total1", depositTotal.ToString("N2"));
             depositTicketDictionary.Add("total2", depositTotal.ToString("N2"));
 
+            depositTicketDictionary.Add("bankName", deposit.Bank.BankName);
+
             return depositTicketDictionary;
         }
         #endregion
