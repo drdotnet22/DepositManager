@@ -66,7 +66,8 @@
     </div>
 </div>
 
-<SfDialog ShowCloseIcon="true" @bind-Visible="depositTicketDialogVisible" AllowPrerender="false">
+<SfDialog ShowCloseIcon="true" @bind-Visible="depositTicketDialogVisible" IsModal="true" Width="1000px" AllowPrerender="false"
+        AllowDragging="true" EnableResize="true" ResizeHandles="@dialogResizeDirections" >
     <DialogTemplates>
         <Header>Deposit Ticket</Header>
         <Content>
@@ -150,6 +151,7 @@
     public Deposit deposit;
     public IEnumerable<Check> checksInDeposit;
     public decimal depositTotal;
+    private ResizeDirection[] dialogResizeDirections { get; set; } = new ResizeDirection[] { ResizeDirection.All };
 
 
     protected override async Task OnInitializedAsync()
