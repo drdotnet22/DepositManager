@@ -4,16 +4,18 @@
 @using DepositManager.Data
 
 @inject MyDbContext dbContext
+@inject EmailServices emailService
 
 <h3>EmailSetup</h3>
 <SfTextBox @bind-Value="emailSettings.Username" Placeholder="Username" FloatLabelType="FloatLabelType.Always"></SfTextBox>
 <SfTextBox @bind-Value="emailSettings.Password" Placeholder="Password" FloatLabelType="FloatLabelType.Always" Type="InputType.Password"></SfTextBox>
 <SfTextBox @bind-Value="emailSettings.Hostname" Placeholder="Host name" FloatLabelType="FloatLabelType.Always"></SfTextBox>
-<SfNumericTextBox TValue="double" @bind-Value="emailSettings.Port" Placeholder="Port" FloatLabelType="FloatLabelType.Always"></SfNumericTextBox>
+<SfNumericTextBox TValue="int" @bind-Value="emailSettings.Port" Placeholder="Port" FloatLabelType="FloatLabelType.Always"></SfNumericTextBox>
 <SfTextBox @bind-Value="emailSettings.Recipient" Placeholder="Recipient" FloatLabelType="FloatLabelType.Always"></SfTextBox>
 
 <SfButton @onclick="SaveEmailAsync" IsPrimary="true">Save changes</SfButton>
 <SfButton @onclick="DeleteEmailAsync" CssClass="e-danger">Delete save settings</SfButton>
+<SfButton @onclick="SendEmail" >Send Email</SfButton>
 
 @code {
     public EmailSettings emailSettings;
@@ -47,5 +49,10 @@
         emailSettings.Recipient = "guy@example.com";
         dbContext.EmailSettings.Update(emailSettings);
         dbContext.SaveChanges();
+    }
+
+    private async Task SendEmail()
+    {
+        emailService.SendEmailAsync();
     }
 }
