@@ -38,7 +38,6 @@ namespace DepositManager
             builder.Services.AddScoped<BankServices>();
             //builder.WebHost.UseUrls("http://*:6428");
 
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

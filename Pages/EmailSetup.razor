@@ -1,0 +1,51 @@
+﻿@page "/email"
+
+@using Microsoft.EntityFrameworkCore
+@using DepositManager.Data
+
+@inject MyDbContext dbContext
+
+<h3>EmailSetup</h3>
+<SfTextBox @bind-Value="emailSettings.Username" Placeholder="Username" FloatLabelType="FloatLabelType.Always"></SfTextBox>
+<SfTextBox @bind-Value="emailSettings.Password" Placeholder="Password" FloatLabelType="FloatLabelType.Always" Type="InputType.Password"></SfTextBox>
+<SfTextBox @bind-Value="emailSettings.Hostname" Placeholder="Host name" FloatLabelType="FloatLabelType.Always"></SfTextBox>
+<SfNumericTextBox TValue="double" @bind-Value="emailSettings.Port" Placeholder="Port" FloatLabelType="FloatLabelType.Always"></SfNumericTextBox>
+<SfTextBox @bind-Value="emailSettings.Recipient" Placeholder="Recipient" FloatLabelType="FloatLabelType.Always"></SfTextBox>
+
+<SfButton @onclick="SaveEmailAsync" IsPrimary="true">Save changes</SfButton>
+<SfButton @onclick="DeleteEmailAsync" CssClass="e-danger">Delete save settings</SfButton>
+
+@code {
+    public EmailSettings emailSettings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            emailSettings = dbContext.EmailSettings.FirstOrDefault();
+        }
+        catch
+        {
+            emailSettings = new EmailSettings();
+            await DeleteEmailAsync();
+        }
+        await base.OnInitializedAsync();
+    }
+
+    private async Task SaveEmailAsync()
+    {
+        dbContext.EmailSettings.Update(emailSettings);
+        dbContext.SaveChanges();
+    }
+
+    private async Task DeleteEmailAsync()
+    {
+        emailSettings.Username = "user@example.com";
+        emailSettings.Password = "password";
+        emailSettings.Hostname = "mail.example.com";
+        emailSettings.Port = 587;
+        emailSettings.Recipient = "guy@example.com";
+        dbContext.EmailSettings.Update(emailSettings);
+        dbContext.SaveChanges();
+    }
+}

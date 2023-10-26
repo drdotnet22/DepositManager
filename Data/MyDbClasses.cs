@@ -26,4 +26,14 @@
         public Guid BankId { get; set; }
         public string BankName { get; set; }
     }
+
+    public class EmailSettings
+    {
+        public Guid EmailSettingsId { get; set;}
+        public string Username { get; set;}
+        public string Password { get; set;}
+        public string Hostname { get; set;}
+        public double Port { get; set; }
+        public string Recipient { get; set; }
+    }
 }

@@ -6,11 +6,12 @@
 @using Microsoft.EntityFrameworkCore
 
 @inject CheckServices checkService
+@inject DepositServices depositService
 @inject NavigationManager NavigationManager
 
 <h3>DepositedChecks</h3>
 
-<SfGrid @ref="Grid" DataSource="@checks" AllowSorting="true" AllowFiltering="true" RowHeight="30">
+<SfGrid @ref="Grid" DataSource="@checks" AllowSorting="true" AllowFiltering="true" RowHeight="25">
     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
     <GridEvents TValue="Check" CommandClicked="CommandClickedHandler"></GridEvents>
     <GridColumns>
@@ -18,7 +19,8 @@
         <GridColumn Field="@nameof(Check.CustomerName)" HeaderText="Customer"></GridColumn>
         <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number"></GridColumn>
         <GridColumn Field="@nameof(Check.Amount)" Format="C2" HeaderText="Check Amount"></GridColumn>
-        <GridColumn HeaderText="Go to deposit">
+        <GridForeignColumn HeaderText="Deposit Date" Field="@nameof(Check.DepositId)" ForeignKeyValue="Date" ForeignDataSource="deposits"></GridForeignColumn>
+        <GridColumn HeaderText="Deposit" Width="100">
             <GridCommandColumns>
                 <GridCommandColumn Type="CommandButtonType.None" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-open-link", CssClass="e-flat" })"></GridCommandColumn>
             </GridCommandColumns>
@@ -29,10 +31,12 @@
 @code {
     public SfGrid<Check> Grid { get; set; }
     public IEnumerable<Check> checks { get; set; }
+    public IEnumerable<Deposit> deposits { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         await RefreshChecks();
+        deposits = await depositService.GetDepositsAsync();
         await base.OnInitializedAsync();
     }
 

@@ -16,6 +16,7 @@ namespace DepositManager.Data
         public DbSet<Deposit> Deposit { get; set; }
         public DbSet<Check> Check { get; set; }
         public DbSet<Bank> Banks { get; set; }
+        public DbSet<EmailSettings> EmailSettings { get; set; }
         #endregion
 
         #region
@@ -24,11 +25,12 @@ namespace DepositManager.Data
             modelBuilder.Entity<Check>().HasData(GetChecks());
             //modelBuilder.Entity<Deposit>().HasData(GetDeposits());
             modelBuilder.Entity<Bank>().HasData(GetBanks());
+            modelBuilder.Entity<EmailSettings>().HasData(GetEmailSettings());
             base.OnModelCreating(modelBuilder);
         }
         #endregion
 
-        #region
+        #region GetData
         private List<Check> GetChecks()
         {
             return new List<Check>
@@ -38,14 +40,13 @@ namespace DepositManager.Data
             };
         }
 
-        //private List<Deposit> GetDeposits()
-        //{
-        //    return new List<Deposit>
-        //    {
-        //        new Deposit { DepositId = Guid.NewGuid(), Date = DateOnly.FromDateTime(DateTime.Now), BankName = "FNB" },
-        //        new Deposit { DepositId = Guid.NewGuid(), Date = DateOnly.FromDateTime(DateTime.Now), BankName = "ERIE" }
-        //    };
-        //}
+        private List<EmailSettings> GetEmailSettings()
+        {
+            return new List<EmailSettings>
+            {
+                new EmailSettings { EmailSettingsId = Guid.NewGuid(), Username = "user@example.com", Password = "password", Hostname = "mail.example.com", Port = 587, Recipient = "guy@example.com"}
+            };
+        }
 
         private List<Bank> GetBanks()
         {
