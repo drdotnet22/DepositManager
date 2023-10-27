@@ -16,13 +16,16 @@
     <div class="content-wrapper">
         <div class="row">
             <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
-                <SfDatePicker @bind-Value="deposit.Date" Placeholder="Date" FloatLabelType="FloatLabelType.Always"></SfDatePicker>
+                <SfDatePicker @bind-Value="deposit.Date" Placeholder="Date" FloatLabelType="FloatLabelType.Always" Readonly="deposit.DepositStatus"></SfDatePicker>
             </div>
             <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
-                <SfTextBox @bind-Value="deposit.Bank.BankName" Placeholder="Bank" FloatLabelType="FloatLabelType.Always" Readonly="true"></SfTextBox>
+                <SfAutoComplete TValue="Bank" TItem="Bank" Placeholder="Bank name" FloatLabelType="FloatLabelType.Auto"
+                                DataSource="banks" @bind-Value="deposit.Bank" Readonly="deposit.DepositStatus" ShowPopupButton="!deposit.DepositStatus">
+                    <AutoCompleteFieldSettings Value="BankName" />
+                </SfAutoComplete>
             </div>
             <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
-                <SfNumericTextBox TValue="decimal?" @bind-Value="deposit.Cash" Placeholder="Cash" FloatLabelType="FloatLabelType.Always" ShowSpinButton="false"></SfNumericTextBox>
+                <SfNumericTextBox TValue="decimal?" @bind-Value="deposit.Cash" Placeholder="Cash" FloatLabelType="FloatLabelType.Always" ShowSpinButton="false" Readonly="deposit.DepositStatus"></SfNumericTextBox>
             </div>
             <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
                 <SfNumericTextBox TValue="decimal" @bind-Value="depositTotal" Placeholder="Deposit Total" FloatLabelType="FloatLabelType.Always" Readonly="true" ShowSpinButton="false"></SfNumericTextBox>
@@ -58,6 +61,7 @@
             <div>
                 @if (!deposit.DepositStatus)
                 {
+                    <SfButton @onclick="SaveDepositChangesAsync" IsPrimary="true">Save Changes</SfButton>
                     <SfButton @onclick="DeleteDeposit" CssClass="e-danger">Delete Deposit</SfButton>
                 }
                 <SfButton @onclick="OpenDepositTicketDialog">Open Deposit Ticket</SfButton>
@@ -150,6 +154,7 @@
 
     public Deposit deposit;
     public IEnumerable<Check> checksInDeposit;
+    public IEnumerable<Bank> banks;
     public decimal depositTotal;
     private ResizeDirection[] dialogResizeDirections { get; set; } = new ResizeDirection[] { ResizeDirection.All };
 
@@ -157,6 +162,7 @@
     protected override async Task OnInitializedAsync()
     {
         deposit = await depositService.GetDepositByIdAsync(depositId);
+        banks = await bankService.GetBanksAsync();
         await RefreshChecks();
         await base.OnInitializedAsync();
     }
@@ -184,6 +190,11 @@
             checkService.UpdateCheckAsync(args.RowData);
             RefreshChecks();
         }
+    }
+
+    private async Task SaveDepositChangesAsync()
+    {
+        depositService.UpdateDepositAsync(deposit);
     }
 
     private async Task DeleteDeposit()
