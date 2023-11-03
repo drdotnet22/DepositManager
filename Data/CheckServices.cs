@@ -37,8 +37,7 @@ namespace DepositManager.Data
             IEnumerable<Check> checksInDeposit;
             try
             {
-                IEnumerable<Check> checks = await dbContext.Check.ToListAsync();
-                checksInDeposit = checks.Where(check => check.Deposit == deposit);
+                checksInDeposit = await dbContext.Check.Where(c => c.Deposit == deposit).ToListAsync();
             }
             catch (Exception)
             {
