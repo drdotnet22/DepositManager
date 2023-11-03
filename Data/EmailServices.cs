@@ -58,7 +58,7 @@ namespace DepositManager.Data
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = new MailAddress(emailSettings.Username);
             mailMessage.To.Add(emailSettings.Recipient);
-            mailMessage.Subject = ($"There is ${totalChecks} to deposit.");
+            mailMessage.Subject = ($"There is {totalChecks:C} to deposit.");
             //var plainView = AlternateView.CreateAlternateViewFromString("blank", null, "text/plain");
             //var htmlView = AlternateView.CreateAlternateViewFromString("blank", null, "text/html");
             //mailMessage.AlternateViews.Add(plainView);
