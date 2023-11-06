@@ -13,6 +13,9 @@
         <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
             <SfNumericTextBox Format="C2" @bind-Value="selectedChecksTotal" ShowSpinButton="false" Readonly="true" Placeholder="Total value of selected checks" FloatLabelType="FloatLabelType.Always"></SfNumericTextBox>
         </div>
+        <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
+            <SfNumericTextBox @bind-Value="selectedChecksNumber" ShowSpinButton="false" Readonly="true" Placeholder="Count of selected checks" FloatLabelType="FloatLabelType.Always"></SfNumericTextBox>
+        </div>
     </div>
     <div class="row">
         <div>
@@ -69,6 +72,7 @@
     public IEnumerable<Check> checks { get; set; }
     public IList<Check> SelectedChecks { get; set; }
     decimal selectedChecksTotal = 0m;
+    int selectedChecksNumber = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -99,7 +103,7 @@
     }
     private void ActionCompleteHandler(ActionEventArgs<Check> Args)
     {
-        
+
     }
 
     public async void CommandClickedHandler(CommandClickEventArgs<Check> args)
@@ -125,5 +129,6 @@
             }
         }
         selectedChecksTotal = total;
+        selectedChecksNumber = SelectedChecks.Count;
     }
 }
