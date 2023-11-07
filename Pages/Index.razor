@@ -6,6 +6,7 @@
 @using Microsoft.EntityFrameworkCore
 
 @inject CheckServices checkService
+@inject EmailServices emailService
 @inject MyDbContext context
 @inject NavigationManager NavigationManager
 @inject SfDialogService DialogService
@@ -20,7 +21,7 @@
                 <SfButton @onclick="OpenNewDepositDialog">Create new deposit with selected checks</SfButton>
             </div>
         </div>
-        <div class="row">
+        <div class="row" @onkeypress="KeypressEventHandler">
             <UnassignedChecks @ref="unassignedChecks" />
         </div>
     </div>
@@ -142,4 +143,18 @@
         }
     }
     #endregion
-}
+
+    private async Task KeypressEventHandler(KeyboardEventArgs args)
+    {
+        if (args.Key == "d")
+        {
+            ToastModel emailStarted = new ToastModel { Title = "Email trigger activated", Content = "You will be notified when the email has been sent.", CssClass = "e-toast-info", Icon = "e-info toast-icons" };
+            await this.ToastObj.ShowAsync(emailStarted);
+
+            decimal totalOfChecks = await checkService.GetTotalOfChecksInDeposit(null);
+            string emailRecipient = await emailService.SendEmailAsync();
+            ToastModel emailToast = new ToastModel { Title = $"Email sent to {emailRecipient}", Content = $"{totalOfChecks:C} to deposit.", CssClass = "e-toast-success", Icon = "e-success toast-icons" };
+            await this.ToastObj.ShowAsync(emailToast);
+        }
+    }
+}   

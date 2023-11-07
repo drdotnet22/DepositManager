@@ -46,6 +46,17 @@ namespace DepositManager.Data
             return checksInDeposit;
         }
 
+        public async Task<decimal> GetTotalOfChecksInDeposit(Deposit deposit)
+        {
+            IEnumerable<Check> checksInDeposit = await dbContext.Check.Where(c => c.Deposit == deposit).ToListAsync();
+            decimal totalChecks = 0m;
+            foreach (Check check in checksInDeposit)
+            {
+                totalChecks += check.Amount;
+            }
+            return totalChecks;
+        }
+
         /// <summary>
         /// This method add a new product to the DbContext and saves it
         /// </summary>

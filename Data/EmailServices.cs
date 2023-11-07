@@ -8,12 +8,14 @@ namespace DepositManager.Data
     {
         #region Private members
         private MyDbContext dbContext;
+        private CheckServices checkServices;
         #endregion
 
         #region Constructor
-        public EmailServices(MyDbContext dbContext)
+        public EmailServices(MyDbContext dbContext, CheckServices checkServices)
         {
             this.dbContext = dbContext;
+            this.checkServices = checkServices;
         }
         #endregion
 
@@ -41,14 +43,10 @@ namespace DepositManager.Data
             return emailSettings;
         }
 
-        public async Task SendEmailAsync()
+        public async Task<string> SendEmailAsync()
         {
-            IList<Check> checks = await dbContext.Check.Where(c => c.Deposit == null).ToListAsync();
-            decimal totalChecks = 0m;
-            foreach (Check check in checks)
-            {
-                totalChecks += check.Amount;
-            }
+            decimal totalChecks = await checkServices.GetTotalOfChecksInDeposit(null);
+            
             EmailSettings emailSettings = await dbContext.EmailSettings.FirstOrDefaultAsync();
             SmtpClient smtpClient = new SmtpClient(emailSettings.Hostname, emailSettings.Port)
             {
@@ -60,6 +58,7 @@ namespace DepositManager.Data
             mailMessage.To.Add(emailSettings.Recipient);
             mailMessage.Subject = ($"{totalChecks:C} to deposit.");
             await smtpClient.SendMailAsync(mailMessage);
+            return emailSettings.Recipient;
         }
         #endregion
     }
