@@ -16,16 +16,16 @@
     <div class="content-wrapper">
         <div class="row">
             <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
-                <SfDatePicker @bind-Value="deposit.Date" Placeholder="Date" FloatLabelType="FloatLabelType.Always" Readonly="deposit.DepositStatus"></SfDatePicker>
+                <SfDatePicker @bind-Value="deposit.Date" Placeholder="Date" FloatLabelType="FloatLabelType.Always" Readonly="!editable"></SfDatePicker>
             </div>
             <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
                 <SfAutoComplete TValue="Bank" TItem="Bank" Placeholder="Bank name" FloatLabelType="FloatLabelType.Auto"
-                                DataSource="banks" @bind-Value="deposit.Bank" Readonly="deposit.DepositStatus" ShowPopupButton="!deposit.DepositStatus">
+                                DataSource="banks" @bind-Value="deposit.Bank" Readonly="!editable" ShowPopupButton="editable">
                     <AutoCompleteFieldSettings Value="BankName" />
                 </SfAutoComplete>
             </div>
             <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
-                <SfNumericTextBox TValue="decimal?" @bind-Value="deposit.Cash" Placeholder="Cash" FloatLabelType="FloatLabelType.Always" ShowSpinButton="false" Readonly="deposit.DepositStatus"></SfNumericTextBox>
+                <SfNumericTextBox TValue="decimal?" @bind-Value="deposit.Cash" Placeholder="Cash" FloatLabelType="FloatLabelType.Always" ShowSpinButton="false" Readonly="!editable"></SfNumericTextBox>
             </div>
             <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
                 <SfNumericTextBox TValue="decimal" @bind-Value="depositTotal" Placeholder="Deposit Total" FloatLabelType="FloatLabelType.Always" Readonly="true" ShowSpinButton="false"></SfNumericTextBox>
@@ -33,8 +33,9 @@
         </div>
         <div class="row">
             <div>
-                <SfGrid DataSource="checksInDeposit" AllowSorting="true" RowHeight="25">
-                    <GridEvents TValue="Check" CommandClicked="CommandClickedHandler"></GridEvents>
+                <SfGrid DataSource="checksInDeposit" AllowSorting="true" RowHeight="25" Toolbar="@(new List<string>() { "Edit", "Update", "Cancel" })">
+                    <GridEvents TValue="Check" CommandClicked="CommandClickedHandler" OnActionBegin="ActionBeginHandler"></GridEvents>
+                    <GridEditSettings AllowEditing="editable" AllowDeleting="editable" Mode="EditMode.Normal"></GridEditSettings>
                     <GridSortSettings>
                         <GridSortColumns>
                             <GridSortColumn Field="Amount" Direction="SortDirection.Ascending"></GridSortColumn>
@@ -42,9 +43,17 @@
                     </GridSortSettings>
                     <GridColumns>
                         <GridColumn Field="@nameof(Check.CustomerName)" HeaderText="Customer Name"></GridColumn>
-                        <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number" Format="###"></GridColumn>
-                        <GridColumn Field="@nameof(Check.Amount)" HeaderText="Amount" Format="C2"></GridColumn>
-                        @if (deposit.DepositStatus != true)
+                        <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number" Format="###" EditType="EditType.NumericEdit">
+                            <EditTemplate>
+                                <SfNumericTextBox @bind-Value="@((context as Check).ReferenceNum)" Format="###" ShowSpinButton="false"></SfNumericTextBox>
+                            </EditTemplate>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(Check.Amount)" HeaderText="Amount" Format="C2">
+                            <EditTemplate>
+                                <SfNumericTextBox @bind-Value="@((context as Check).Amount)" Format="$ ###.##" ShowSpinButton="false"></SfNumericTextBox>
+                            </EditTemplate>
+                        </GridColumn>
+                        @if (editable)
                         {
                             <GridColumn>
                                 <GridCommandColumns>
@@ -59,12 +68,16 @@
         </div>
         <div class="row">
             <div>
-                @if (!deposit.DepositStatus)
+                @if (editable)
                 {
                     <SfButton @onclick="SaveDepositChangesAsync" IsPrimary="true">Save Changes</SfButton>
                     <SfButton @onclick="DeleteDeposit" CssClass="e-danger">Delete Deposit</SfButton>
                 }
                 <SfButton @onclick="OpenDepositTicketDialog">Open Deposit Ticket</SfButton>
+                @if (!editable)
+                {
+                    <SfButton @onclick="OpenAllowEditingDialog">Enable editing</SfButton>
+                }
             </div>
         </div>
     </div>
@@ -78,6 +91,17 @@
             <CascadingValue Value="deposit">
                 <DepositTicket/>
             </CascadingValue>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+<SfDialog ShowCloseIcon="true" @bind-Visible="allowEditingDialogVisible" IsModal="true" Width="300px" AllowPrerender="false">
+    <DialogTemplates>
+        <Header>Enable editing</Header>
+        <Content>
+            <p>Do you want to allow editing of this deposit? It appears like it was already deposited.</p>
+            <SfTextBox @bind-Value="editPassword" Placeholder="Password" FloatLabelType="FloatLabelType.Always"></SfTextBox>
+            <SfButton @onclick="SaveEditingPermission">Continue</SfButton>
         </Content>
     </DialogTemplates>
 </SfDialog>
@@ -151,7 +175,7 @@
 @code {
     [Parameter]
     public string? depositId { get; set; }
-
+    public bool editable = false;
     public Deposit deposit;
     public IEnumerable<Check> checksInDeposit;
     public IEnumerable<Bank> banks;
@@ -163,6 +187,7 @@
     {
         deposit = await depositService.GetDepositByIdAsync(depositId);
         banks = await bankService.GetBanksAsync();
+        editable = !deposit.DepositStatus;
         await RefreshChecks();
         await base.OnInitializedAsync();
     }
@@ -173,6 +198,7 @@
         depositTotal = await depositService.GetDepositTotalAsync(deposit);
     }
 
+    #region DataGrid handlers
     public async void CommandClickedHandler(CommandClickEventArgs<Check> args)
     {
         if (args.CommandColumn.Type == CommandButtonType.Delete)
@@ -191,6 +217,24 @@
             RefreshChecks();
         }
     }
+
+    private void ActionBeginHandler(ActionEventArgs<Check> Args)
+    {
+        if (Args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save))
+        {
+            if (Args.Action == "Edit")
+            {
+                checkService.UpdateCheck(Args.Data);
+                RefreshChecks();
+            }
+        }
+        if (Args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
+        {
+            checkService.DeleteCheckAsync(Args.Data);
+            RefreshChecks();
+        }
+    }
+    #endregion
 
     private async Task SaveDepositChangesAsync()
     {
@@ -212,8 +256,26 @@
     public async Task OpenDepositTicketDialog()
     {
         deposit.DepositStatus = true;
+        editable = false;
         await depositService.UpdateDepositAsync(deposit);
         this.depositTicketDialogVisible = true;
+    }
+
+    public bool allowEditingDialogVisible = false;
+    public string editPassword;
+    public async Task OpenAllowEditingDialog()
+    {
+        this.allowEditingDialogVisible = true;
+    }
+
+    public async Task SaveEditingPermission()
+    {
+        if (editPassword == "1965")
+        {
+            editable = true;
+        }
+        editPassword = null;
+        this.allowEditingDialogVisible = false;
     }
     #endregion
 }
