@@ -28,9 +28,9 @@
 </div>
 
 
-<SfDialog ShowCloseIcon="true" @bind-Visible="depositDialogVisible" AllowPrerender="false">
+<SfDialog ShowCloseIcon="true" @bind-Visible="depositDialogVisible" Width="250px" AllowPrerender="false">
     <DialogTemplates>
-        <Header>New Deposit</Header>
+        <Header>Create Deposit</Header>
         <Content>
             <CascadingValue Value="unassignedChecks.SelectedChecks">
                 <CreateDeposit OnClick="CloseNewDepositDialog" />
@@ -146,7 +146,7 @@
 
     private async Task KeypressEventHandler(KeyboardEventArgs args)
     {
-        if (args.Key == "d")
+        if (args.Code == "Backquote") // checks for the ` key pressed
         {
             ToastModel emailStarted = new ToastModel { Title = "Email trigger activated", Content = "You will be notified when the email has been sent.", CssClass = "e-toast-info", Icon = "e-info toast-icons" };
             await this.ToastObj.ShowAsync(emailStarted);
