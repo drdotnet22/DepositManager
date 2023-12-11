@@ -6,15 +6,23 @@
 @inject BankServices bankService
 @inject NavigationManager NavigationManager
 
-<h3>CreateDeposit</h3>
-
-<SfAutoComplete TValue="Bank" TItem="Bank" Placeholder="Bank name" FloatLabelType="FloatLabelType.Auto"
-    DataSource="banks" @bind-Value="newDeposit.Bank" Autofill="true">
-    <AutoCompleteFieldSettings Value="BankName" />
-</SfAutoComplete>
-<SfNumericTextBox TValue="decimal?" @bind-Value="newDeposit.Cash" Placeholder="Cash" ShowSpinButton="false"></SfNumericTextBox>
-<SfDatePicker @bind-Value="newDeposit.Date" ></SfDatePicker>
-<SfButton @onclick="SaveNewDeposit" IsPrimary="true">Save</SfButton>
+<div class="content-wrapper">
+    <div class="row">
+        <SfAutoComplete TValue="Bank" TItem="Bank" Placeholder="Bank name" FloatLabelType="FloatLabelType.Auto"
+                        DataSource="banks" @bind-Value="newDeposit.Bank" Autofill="true">
+            <AutoCompleteFieldSettings Value="BankName" />
+        </SfAutoComplete>
+    </div>
+    <div class="row">
+        <SfNumericTextBox TValue="decimal?" @bind-Value="newDeposit.Cash" Placeholder="Cash" ShowSpinButton="false"></SfNumericTextBox>
+    </div>
+    <div class="row">
+        <SfDatePicker @bind-Value="newDeposit.Date"></SfDatePicker>
+    </div>
+    <div class="row">
+        <SfButton @onclick="SaveNewDeposit" IsPrimary="true">Save</SfButton>
+    </div>
+</div>
 
 @code {
     private Deposit newDeposit { get; set; } = new Deposit();
