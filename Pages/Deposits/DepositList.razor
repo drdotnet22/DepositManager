@@ -8,12 +8,19 @@
 @inject NavigationManager NavigationManager
 
 <h3>DepositList</h3>
-<SfGrid DataSource="deposits">
+<SfGrid DataSource="deposits" AllowPaging="true" AllowSorting="true">
     <GridEvents OnRecordDoubleClick="DoubleClickHandler" TValue="Deposit" ></GridEvents>
+    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+    <GridPageSettings PageCount="5" PageSizes="22"></GridPageSettings>
+    <GridSortSettings>
+        <GridSortColumns>
+            <GridSortColumn Field="Date" Direction="SortDirection.Descending"></GridSortColumn>
+        </GridSortColumns>
+    </GridSortSettings>
     <GridColumns>
-        <GridColumn Field="@nameof(Deposit.Date)" HeaderText="Deposit Date" ></GridColumn>
+        <GridColumn Field="@nameof(Deposit.Date)" HeaderText="Deposit Date" FilterSettings="@(new FilterSettings{Type = Syncfusion.Blazor.Grids.FilterType.Excel })"></GridColumn>
         <GridForeignColumn Field="@nameof(Deposit.BankId)" ForeignKeyValue="BankName" ForeignDataSource="@banks"></GridForeignColumn>
-        <GridColumn Field="@nameof(Deposit.DepositTotal)" HeaderText="Deposit Total" Format="C2" ></GridColumn>
+        <GridColumn Field="@nameof(Deposit.DepositTotal)" HeaderText="Deposit Total" TextAlign="TextAlign.Right" Format="C2" ></GridColumn>
     </GridColumns>
 </SfGrid>
 
