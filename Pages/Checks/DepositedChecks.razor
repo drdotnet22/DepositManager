@@ -11,10 +11,10 @@
 
 <h3>DepositedChecks</h3>
 
-<SfGrid @ref="Grid" DataSource="@checks" AllowSorting="true" AllowFiltering="true" RowHeight="25">
+<SfGrid @ref="Grid" DataSource="@checks" AllowSorting="true" AllowFiltering="true" RowHeight="25" AllowPaging="true">
     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
     <GridEvents TValue="Check" CommandClicked="CommandClickedHandler"></GridEvents>
-    <GridPageSettings PageCount="5" PageSizes="22"></GridPageSettings>
+    <GridPageSettings PageCount="5" PageSize="23" ></GridPageSettings>
     <GridSortSettings>
         <GridSortColumns>
             <GridSortColumn Field="DepositId" Direction="SortDirection.Descending"></GridSortColumn>
@@ -26,7 +26,7 @@
         <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number"></GridColumn>
         <GridColumn Field="@nameof(Check.Amount)" Format="C2" HeaderText="Check Amount"></GridColumn>
         <GridForeignColumn HeaderText="Deposit Date" Field="@nameof(Check.DepositId)" ForeignKeyValue="Date" ForeignDataSource="deposits"></GridForeignColumn>
-        <GridForeignColumn HeaderText="Bank" Field="@nameof(Check.DepositId)" ForeignKeyValue="Bank" ForeignDataSource="deposits" ></GridForeignColumn>
+        @* <GridForeignColumn TValue="Deposit" HeaderText="Bank" Field="@nameof(Check.DepositId)" ForeignKeyField="BankId" ForeignKeyValue="BankName" ForeignDataSource="deposits" ></GridForeignColumn> *@
         <GridColumn HeaderText="Deposit" Width="100">
             <GridCommandColumns>
                 <GridCommandColumn Type="CommandButtonType.None" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-open-link", CssClass="e-flat" })"></GridCommandColumn>
@@ -37,6 +37,7 @@
 
 @code {
     public SfGrid<Check> Grid { get; set; }
+    public IEnumerable<Check> checkList { get; set; }
     public IEnumerable<Check> checks { get; set; }
     public IEnumerable<Deposit> deposits { get; set; }
 
@@ -49,8 +50,8 @@
 
     private async Task RefreshChecks()
     {
-        checks = await checkService.GetChecksAsync();
-        checks = checks.Where(c => c.Deposit != null);
+        checkList = await checkService.GetChecksAsync();
+        checks = checkList.Where(c => c.Deposit != null);
     }
 
     public async void CommandClickedHandler(CommandClickEventArgs<Check> args)
