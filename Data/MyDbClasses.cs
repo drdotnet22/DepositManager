@@ -8,7 +8,7 @@
         public Guid BankId { get; set; }
         public bool DepositStatus { get; set; }
         public decimal? Cash { get; set; }
-        public decimal? DepositTotal { get; set; }
+        public decimal DepositTotal { get; set; }
     }
 
     public class Check

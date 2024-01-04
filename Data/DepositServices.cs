@@ -75,6 +75,7 @@ namespace DepositManager.Data
         {
             try
             {
+                deposit.DepositTotal = 0m;
                 dbContext.Deposit.Add(deposit);
                 await dbContext.SaveChangesAsync();
             }
@@ -167,8 +168,9 @@ namespace DepositManager.Data
             }
             depositTicketDictionary.Add("ckNum1", checksInDeposit.Count.ToString());
             //deposit total
-            depositTicketDictionary.Add("Total1", deposit.DepositTotal?.ToString("N2"));
-            depositTicketDictionary.Add("total2", deposit.DepositTotal?.ToString("N2"));
+            await CalculateDepositTotalAsync(deposit);
+            depositTicketDictionary.Add("Total1", deposit.DepositTotal.ToString("N2"));
+            depositTicketDictionary.Add("total2", deposit.DepositTotal.ToString("N2"));
 
             depositTicketDictionary.Add("bankName", deposit.Bank.BankName);
 

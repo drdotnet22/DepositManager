@@ -50,8 +50,8 @@
             check.Deposit = newDeposit;
             checkService.UpdateCheckAsync(check);
         }
+        depositService.CalculateDepositTotalAsync(newDeposit);
         await OnClick.InvokeAsync("CloseDialog");
-        string newDepositId = newDeposit.DepositId.ToString();
-        NavigationManager.NavigateTo("/deposit/" + newDepositId);
+        NavigationManager.NavigateTo("/deposit/" + newDeposit.DepositId.ToString());
     }
 }
