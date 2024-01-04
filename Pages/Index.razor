@@ -44,6 +44,54 @@
 </SfToast>
 
 
+@code {
+    private UnassignedChecks unassignedChecks;
+    SfToast ToastObj;
+
+    private async Task AddCheck()
+    {
+        NavigationManager.NavigateTo($"/checks/new");
+    }
+
+    #region Dialog
+    private bool depositDialogVisible = false;
+    public async Task OpenNewDepositDialog()
+    {
+        unassignedChecks.SelectedChecks = await unassignedChecks.Grid.GetSelectedRecordsAsync();
+        if (unassignedChecks.SelectedChecks.Count > 18)
+        {
+            ToastModel errorToast = new ToastModel { Title = "Error!", Content = "You cannot have more than 18 checks on a deposit.", CssClass = "e-toast-danger", Icon = "e-error toast-icons" };
+            await this.ToastObj.ShowAsync(errorToast);
+            return;
+        }
+        this.depositDialogVisible = true;
+    }
+
+    public void CloseNewDepositDialog(string action)
+    {
+        if (action == "CloseDialog")
+        {
+            this.depositDialogVisible = false;
+        }
+    }
+    #endregion
+
+    private async Task KeypressEventHandler(KeyboardEventArgs args)
+    {
+        if (args.Code == "Backquote") // checks for the ` key pressed
+        {
+            ToastModel emailStarted = new ToastModel { Title = "Email trigger activated", Content = "You will be notified when the email has been sent.", CssClass = "e-toast-info", Icon = "e-info toast-icons" };
+            await this.ToastObj.ShowAsync(emailStarted);
+
+            decimal totalOfChecks = await checkService.GetTotalOfChecksInDeposit(null);
+            string emailRecipient = await emailService.SendEmailAsync();
+            ToastModel emailToast = new ToastModel { Title = $"Email sent to {emailRecipient}", Content = $"{totalOfChecks:C} to deposit.", CssClass = "e-toast-success", Icon = "e-success toast-icons" };
+            await this.ToastObj.ShowAsync(emailToast);
+        }
+    }
+}
+
+
 <style>
     @@font-face {
         font-family: 'Toast_icons';
@@ -107,54 +155,7 @@
         min-width: 85px;
     }
 
-    .content-wrapper div.row {
-        padding: 15px 0px;
-    }
+        .content-wrapper div.row {
+            padding: 15px 0px;
+        }
 </style>
-
-@code {
-    private UnassignedChecks unassignedChecks;
-    SfToast ToastObj;
-
-    private async Task AddCheck()
-    {
-        NavigationManager.NavigateTo($"/checks/new");
-    }
-
-    #region Dialog
-    private bool depositDialogVisible = false;
-    public async Task OpenNewDepositDialog()
-    {
-        unassignedChecks.SelectedChecks = await unassignedChecks.Grid.GetSelectedRecordsAsync();
-        if (unassignedChecks.SelectedChecks.Count > 18)
-        {
-            ToastModel errorToast = new ToastModel { Title = "Error!", Content = "You cannot have more than 18 checks on a deposit.", CssClass = "e-toast-danger", Icon = "e-error toast-icons" };
-            await this.ToastObj.ShowAsync(errorToast);
-            return;
-        }
-        this.depositDialogVisible = true;
-    }
-
-    public void CloseNewDepositDialog(string action)
-    {
-        if (action == "CloseDialog")
-        {
-            this.depositDialogVisible = false;
-        }
-    }
-    #endregion
-
-    private async Task KeypressEventHandler(KeyboardEventArgs args)
-    {
-        if (args.Code == "Backquote") // checks for the ` key pressed
-        {
-            ToastModel emailStarted = new ToastModel { Title = "Email trigger activated", Content = "You will be notified when the email has been sent.", CssClass = "e-toast-info", Icon = "e-info toast-icons" };
-            await this.ToastObj.ShowAsync(emailStarted);
-
-            decimal totalOfChecks = await checkService.GetTotalOfChecksInDeposit(null);
-            string emailRecipient = await emailService.SendEmailAsync();
-            ToastModel emailToast = new ToastModel { Title = $"Email sent to {emailRecipient}", Content = $"{totalOfChecks:C} to deposit.", CssClass = "e-toast-success", Icon = "e-success toast-icons" };
-            await this.ToastObj.ShowAsync(emailToast);
-        }
-    }
-}   

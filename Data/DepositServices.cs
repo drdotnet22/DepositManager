@@ -37,9 +37,9 @@ namespace DepositManager.Data
             Deposit deposit;
             try
             {
-                await CalculateDepositTotalAsync(depositId);
-                //IList<Deposit> depositList = await dbContext.Deposit.Include(b => b.Bank).ToListAsync();
-                deposit = dbContext.Deposit.FirstOrDefault(d => d.DepositId.ToString() == depositId);
+                IList<Deposit> depositList = await dbContext.Deposit.Include(b => b.Bank).ToListAsync();
+                deposit = depositList.FirstOrDefault(d => d.DepositId.ToString() == depositId);
+                await CalculateDepositTotalAsync(deposit);
             }
             catch (Exception)
             {
@@ -48,9 +48,8 @@ namespace DepositManager.Data
             return deposit;
         }
 
-        public async Task CalculateDepositTotalAsync(string depositId)
+        public async Task CalculateDepositTotalAsync(Deposit deposit)
         {
-            Deposit deposit = dbContext.Deposit.FirstOrDefault(d => d.DepositId.ToString() == depositId);
             decimal total = 0m;
             if (deposit.Cash != null)
             {
@@ -100,7 +99,7 @@ namespace DepositManager.Data
                 {
                     dbContext.Update(deposit);
                     await dbContext.SaveChangesAsync();
-                    await CalculateDepositTotalAsync(deposit.DepositId.ToString());
+                    await CalculateDepositTotalAsync(deposit);
                 }
             }
             catch (Exception)
