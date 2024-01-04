@@ -23,7 +23,7 @@ namespace DepositManager.Data
         /// <returns></returns>
         public async Task<List<Check>> GetChecksAsync()
         {
-            return await dbContext.Check.ToListAsync();
+            return await dbContext.Check.Include(c => c.Deposit).ToListAsync();
         }
 
         /// <summary>
