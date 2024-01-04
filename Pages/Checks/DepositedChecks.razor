@@ -17,7 +17,7 @@
     <GridPageSettings PageCount="5" PageSizes="22"></GridPageSettings>
     <GridSortSettings>
         <GridSortColumns>
-            <GridSortColumn Field="Date" Direction="SortDirection.Descending"></GridSortColumn>
+            <GridSortColumn Field="DepositId" Direction="SortDirection.Descending"></GridSortColumn>
         </GridSortColumns>
     </GridSortSettings>
     <GridColumns>
@@ -26,6 +26,7 @@
         <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number"></GridColumn>
         <GridColumn Field="@nameof(Check.Amount)" Format="C2" HeaderText="Check Amount"></GridColumn>
         <GridForeignColumn HeaderText="Deposit Date" Field="@nameof(Check.DepositId)" ForeignKeyValue="Date" ForeignDataSource="deposits"></GridForeignColumn>
+        <GridForeignColumn HeaderText="Bank" Field="@nameof(Check.DepositId)" ForeignKeyValue="Bank" ForeignDataSource="deposits" ></GridForeignColumn>
         <GridColumn HeaderText="Deposit" Width="100">
             <GridCommandColumns>
                 <GridCommandColumn Type="CommandButtonType.None" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-open-link", CssClass="e-flat" })"></GridCommandColumn>
