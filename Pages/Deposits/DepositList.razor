@@ -13,6 +13,7 @@
     <GridColumns>
         <GridColumn Field="@nameof(Deposit.Date)" HeaderText="Deposit Date" ></GridColumn>
         <GridForeignColumn Field="@nameof(Deposit.BankId)" ForeignKeyValue="BankName" ForeignDataSource="@banks"></GridForeignColumn>
+        <GridColumn Field="@nameof(Deposit.DepositTotal)" HeaderText="Deposit Total" Format="C2" ></GridColumn>
     </GridColumns>
 </SfGrid>
 

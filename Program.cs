@@ -37,7 +37,7 @@ namespace DepositManager
             builder.Services.AddScoped<CheckServices>();
             builder.Services.AddScoped<BankServices>();
             builder.Services.AddScoped<EmailServices>();
-            builder.WebHost.UseUrls("http://*:6428");
+            //builder.WebHost.UseUrls("http://*:6428");
 
             var app = builder.Build();
 

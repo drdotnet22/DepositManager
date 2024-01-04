@@ -37,8 +37,9 @@ namespace DepositManager.Data
             Deposit deposit;
             try
             {
-                IList<Deposit> depositList = await dbContext.Deposit.Include(b => b.Bank).ToListAsync();
-                deposit = depositList.FirstOrDefault(d => d.DepositId.ToString() == depositId);
+                await CalculateDepositTotalAsync(depositId);
+                //IList<Deposit> depositList = await dbContext.Deposit.Include(b => b.Bank).ToListAsync();
+                deposit = dbContext.Deposit.FirstOrDefault(d => d.DepositId.ToString() == depositId);
             }
             catch (Exception)
             {
@@ -47,10 +48,9 @@ namespace DepositManager.Data
             return deposit;
         }
 
-        ///<param name="deposit"></param>
-        ///<returns></returns>
-        public async Task<decimal> GetDepositTotalAsync(Deposit deposit)
+        public async Task CalculateDepositTotalAsync(string depositId)
         {
+            Deposit deposit = dbContext.Deposit.FirstOrDefault(d => d.DepositId.ToString() == depositId);
             decimal total = 0m;
             if (deposit.Cash != null)
             {
@@ -61,7 +61,9 @@ namespace DepositManager.Data
             {
                 total = total + check.Amount;
             }
-            return total;
+            deposit.DepositTotal = total;
+            dbContext.Deposit.Update(deposit);
+            dbContext.SaveChangesAsync();
         }
 
 
@@ -98,6 +100,7 @@ namespace DepositManager.Data
                 {
                     dbContext.Update(deposit);
                     await dbContext.SaveChangesAsync();
+                    await CalculateDepositTotalAsync(deposit.DepositId.ToString());
                 }
             }
             catch (Exception)
@@ -165,9 +168,8 @@ namespace DepositManager.Data
             }
             depositTicketDictionary.Add("ckNum1", checksInDeposit.Count.ToString());
             //deposit total
-            decimal depositTotal = await GetDepositTotalAsync(deposit);
-            depositTicketDictionary.Add("Total1", depositTotal.ToString("N2"));
-            depositTicketDictionary.Add("total2", depositTotal.ToString("N2"));
+            depositTicketDictionary.Add("Total1", deposit.DepositTotal?.ToString("N2"));
+            depositTicketDictionary.Add("total2", deposit.DepositTotal?.ToString("N2"));
 
             depositTicketDictionary.Add("bankName", deposit.Bank.BankName);
 

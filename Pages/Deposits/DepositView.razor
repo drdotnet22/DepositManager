@@ -28,7 +28,7 @@
                 <SfNumericTextBox TValue="decimal?" @bind-Value="deposit.Cash" Placeholder="Cash" FloatLabelType="FloatLabelType.Always" ShowSpinButton="false" Readonly="!editable"></SfNumericTextBox>
             </div>
             <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
-                <SfNumericTextBox TValue="decimal" @bind-Value="depositTotal" Placeholder="Deposit Total" FloatLabelType="FloatLabelType.Always" Readonly="true" ShowSpinButton="false"></SfNumericTextBox>
+                <SfNumericTextBox TValue="decimal?" @bind-Value="deposit.DepositTotal" Placeholder="Deposit Total" FloatLabelType="FloatLabelType.Always" Readonly="true" ShowSpinButton="false"></SfNumericTextBox>
             </div>
         </div>
         <div class="row">
@@ -179,7 +179,6 @@
     public Deposit deposit;
     public IEnumerable<Check> checksInDeposit;
     public IEnumerable<Bank> banks;
-    public decimal depositTotal;
     private ResizeDirection[] dialogResizeDirections { get; set; } = new ResizeDirection[] { ResizeDirection.All };
 
 
@@ -195,7 +194,6 @@
     private async Task RefreshChecks()
     {
         checksInDeposit = await checkService.GetChecksInDepositAsync(deposit);
-        depositTotal = await depositService.GetDepositTotalAsync(deposit);
     }
 
     #region DataGrid handlers
