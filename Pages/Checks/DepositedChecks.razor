@@ -14,6 +14,12 @@
 <SfGrid @ref="Grid" DataSource="@checks" AllowSorting="true" AllowFiltering="true" RowHeight="25">
     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
     <GridEvents TValue="Check" CommandClicked="CommandClickedHandler"></GridEvents>
+    <GridPageSettings PageCount="5" PageSizes="22"></GridPageSettings>
+    <GridSortSettings>
+        <GridSortColumns>
+            <GridSortColumn Field="Date" Direction="SortDirection.Descending"></GridSortColumn>
+        </GridSortColumns>
+    </GridSortSettings>
     <GridColumns>
         <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
         <GridColumn Field="@nameof(Check.CustomerName)" HeaderText="Customer"></GridColumn>
