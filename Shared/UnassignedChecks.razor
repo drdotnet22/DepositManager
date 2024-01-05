@@ -4,73 +4,109 @@
 @using Microsoft.EntityFrameworkCore
 
 @inject CheckServices checkService
-@inject MyDbContext dbContext
+@inject EmailServices emailService
 @inject NavigationManager NavigationManager
 @inject SfDialogService DialogService
 
-<div>
-    <div class="row">
-        <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
-            <SfNumericTextBox Format="C2" @bind-Value="selectedChecksTotal" ShowSpinButton="false" Readonly="true" Placeholder="Total value of selected checks" FloatLabelType="FloatLabelType.Always"></SfNumericTextBox>
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+        <h3>Unnassigned Checks</h3>
+        <div class="row" style="display: flex; align-items:flex-end">
+            <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
+                <SfNumericTextBox Format="C2" @bind-Value="selectedChecksTotal" ShowSpinButton="false" Readonly="true" Placeholder="Total value of selected checks" FloatLabelType="FloatLabelType.Always"></SfNumericTextBox>
+            </div>
+            <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
+                <SfNumericTextBox @bind-Value="selectedChecksNumber" ShowSpinButton="false" Readonly="true" Placeholder="Count of selected checks" FloatLabelType="FloatLabelType.Always"></SfNumericTextBox>
+            </div>
+            <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
+                <SfButton @onclick="OpenNewDepositDialog" style="position:center">Create new deposit with selected checks</SfButton>
+            </div>
         </div>
-        <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
-            <SfNumericTextBox @bind-Value="selectedChecksNumber" ShowSpinButton="false" Readonly="true" Placeholder="Count of selected checks" FloatLabelType="FloatLabelType.Always"></SfNumericTextBox>
-        </div>
-    </div>
-    <div class="row">
-        <div>
-            <SfGrid @ref="Grid" DataSource="@checks" Toolbar="@(new List<string>() { "Edit", "Update", "Cancel" })" AllowSelection="true" AllowSorting="true" RowHeight="30">
-                <GridSelectionSettings AllowDragSelection="true" Type="Syncfusion.Blazor.Grids.SelectionType.Multiple"
-                                       Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
-                <GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true"></GridEditSettings>
-                <GridEvents OnActionBegin="ActionBeginHandler" TValue="Check"
-                            RowSelected="GetSelectedCheckAmountTotal" RowDeselected="GetSelectedCheckAmountTotal"></GridEvents>
-                <GridColumns>
-                    <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
-                    <GridColumn Field="@nameof(Check.CustomerName)" HeaderText="Customer"></GridColumn>
-                    <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number"></GridColumn>
-                    <GridColumn Field="@nameof(Check.Amount)" Format="C2" HeaderText="Check Amount"></GridColumn>
-                    <GridColumn>
-                        <GridCommandColumns>
-                            <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-delete", CssClass="e-flat" })"></GridCommandColumn>
-                        </GridCommandColumns>
-                    </GridColumn>
-                </GridColumns>
-                <GridAggregates>
-                    <GridAggregate>
-                        <GridAggregateColumns>
-                            <GridAggregateColumn Field="@nameof(Check.ReferenceNum)" Type="AggregateType.Count">
-                                <FooterTemplate>
-                                    @{
-                                        var CountValue = (context as AggregateTemplateContext);
-                                        <div>
-                                            Number of checks: @CountValue.Count
-                                        </div>
-                                    }
-                                </FooterTemplate>
-                            </GridAggregateColumn>
-                            <GridAggregateColumn Field="@nameof(Check.Amount)" Type="AggregateType.Sum" Format="C2">
-                                <FooterTemplate>
-                                    @{
-                                        var SumValue = (context as AggregateTemplateContext);
-                                        <div>
-                                            Sum: @SumValue.Sum
-                                        </div>
-                                    }
-                                </FooterTemplate>
-                            </GridAggregateColumn>
-                        </GridAggregateColumns>
-                    </GridAggregate>
-                </GridAggregates>
-            </SfGrid>
+        <div class="row" @onkeypress="KeypressEventHandler">
+            <div>
+                <SfGrid @ref="Grid" DataSource="@checks" Toolbar="@(new List<string>() { "Add", "Edit", "Update", "Cancel" })" AllowSelection="true" AllowSorting="true" RowHeight="30">
+                    <GridSelectionSettings AllowDragSelection="true" Type="Syncfusion.Blazor.Grids.SelectionType.Multiple"
+                                            Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
+                    <GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true"></GridEditSettings>
+                    <GridEvents OnActionBegin="ActionBeginHandler" TValue="Check"
+                                RowSelected="GetSelectedCheckAmountTotal" RowDeselected="GetSelectedCheckAmountTotal"></GridEvents>
+                    <GridColumns>
+                        <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+                        <GridColumn Field="@nameof(Check.CustomerName)" HeaderText="Customer">
+                            <EditTemplate>
+                                <SfTextBox Placeholder="Customer name" @bind-Value="@((context as Check).CustomerName)"></SfTextBox>
+                            </EditTemplate>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(Check.ReferenceNum)" HeaderText="Reference Number">
+                            <EditTemplate>
+                                <SfNumericTextBox Placeholder="Reference Number" Format="###" @bind-Value="@((context as Check).ReferenceNum)" ShowSpinButton="false"></SfNumericTextBox>
+                            </EditTemplate>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(Check.Amount)" Format="C2" HeaderText="Check Amount">
+                            <EditTemplate>
+                                <SfNumericTextBox Placeholder="Amount" Format="C2" @bind-Value="@((context as Check).Amount)" ShowSpinButton="false"></SfNumericTextBox>
+                            </EditTemplate>
+                        </GridColumn>
+                        <GridColumn>
+                            <GridCommandColumns>
+                                <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-delete", CssClass="e-flat" })"></GridCommandColumn>
+                            </GridCommandColumns>
+                        </GridColumn>
+                    </GridColumns>
+                    <GridAggregates>
+                        <GridAggregate>
+                            <GridAggregateColumns>
+                                <GridAggregateColumn Field="@nameof(Check.ReferenceNum)" Type="AggregateType.Count">
+                                    <FooterTemplate>
+                                        @{
+                                            var CountValue = (context as AggregateTemplateContext);
+                                            <div>
+                                                Number of checks: @CountValue.Count
+                                            </div>
+                                        }
+                                    </FooterTemplate>
+                                </GridAggregateColumn>
+                                <GridAggregateColumn Field="@nameof(Check.Amount)" Type="AggregateType.Sum" Format="C2">
+                                    <FooterTemplate>
+                                        @{
+                                            var SumValue = (context as AggregateTemplateContext);
+                                            <div>
+                                                Sum: @SumValue.Sum
+                                            </div>
+                                        }
+                                    </FooterTemplate>
+                                </GridAggregateColumn>
+                            </GridAggregateColumns>
+                        </GridAggregate>
+                    </GridAggregates>
+                </SfGrid>
+            </div>
         </div>
     </div>
 </div>
+
+
+<SfDialog ShowCloseIcon="true" @bind-Visible="depositDialogVisible" Width="250px" AllowPrerender="false">
+    <DialogTemplates>
+        <Header>Create Deposit</Header>
+        <Content>
+            <CascadingValue Value="SelectedChecks">
+                <CreateDeposit OnClick="CloseNewDepositDialog" />
+            </CascadingValue>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+
+<SfToast @ref="ToastObj" ID="toast_type">
+    <ToastPosition X="Center"></ToastPosition>
+</SfToast>
 
 @code {
     public SfGrid<Check> Grid { get; set; }
     public IEnumerable<Check> checks { get; set; }
     public IList<Check> SelectedChecks { get; set; }
+    SfToast ToastObj;
     decimal selectedChecksTotal = 0m;
     int selectedChecksNumber = 0;
 
@@ -89,13 +125,28 @@
     {
         if (Args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save))
         {
-            if (Args.Action == "Edit")
+            if (Args.Action == "Add")
+            {
+                if (Args.Data.ReferenceNum > 0 && Args.Data.CustomerName != null)
+                {
+                    checkService.AddCheckAsync(Args.Data);
+                    RefreshChecks();
+                }
+                else
+                {
+                    ToastModel invalidCheck = new ToastModel { Title = $"Invalid", Content = $"Please enter valid details for a new check.", CssClass = "e-toast-danger", Icon = "e-error toast-icons" };
+                    this.ToastObj.ShowAsync(invalidCheck);
+                    checkService.DeleteCheckAsync(Args.Data);
+                    RefreshChecks();
+                }
+            }
+            else if (Args.Action == "Edit")
             {
                 checkService.UpdateCheck(Args.Data);
                 RefreshChecks();
             }
         }
-        if (Args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
+        else if (Args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
         {
             checkService.DeleteCheckAsync(Args.Data);
             RefreshChecks();
@@ -131,4 +182,109 @@
         selectedChecksTotal = total;
         selectedChecksNumber = SelectedChecks.Count;
     }
+
+    private async Task KeypressEventHandler(KeyboardEventArgs args)
+    {
+        if (args.Code == "Backquote") // checks for the ` key pressed
+        {
+            ToastModel emailStarted = new ToastModel { Title = "Email trigger activated", Content = "You will be notified when the email has been sent.", CssClass = "e-toast-info", Icon = "e-info toast-icons" };
+            await this.ToastObj.ShowAsync(emailStarted);
+
+            decimal totalOfChecks = await checkService.GetTotalOfChecksInDeposit(null);
+            string emailRecipient = await emailService.SendEmailAsync();
+            ToastModel emailToast = new ToastModel { Title = $"Email sent to {emailRecipient}", Content = $"{totalOfChecks:C} to deposit.", CssClass = "e-toast-success", Icon = "e-success toast-icons" };
+            await this.ToastObj.ShowAsync(emailToast);
+        }
+    }
+
+    #region Dialog
+    private bool depositDialogVisible = false;
+    public async Task OpenNewDepositDialog()
+    {
+        SelectedChecks = await Grid.GetSelectedRecordsAsync();
+        if (SelectedChecks.Count > 18)
+        {
+            ToastModel errorToast = new ToastModel { Title = "Error!", Content = "You cannot have more than 18 checks on a deposit.", CssClass = "e-toast-danger", Icon = "e-error toast-icons" };
+            await this.ToastObj.ShowAsync(errorToast);
+            return;
+        }
+        this.depositDialogVisible = true;
+    }
+
+    public void CloseNewDepositDialog(string action)
+    {
+        if (action == "CloseDialog")
+        {
+            this.depositDialogVisible = false;
+        }
+    }
+    #endregion
 }
+
+<style>
+    @@font-face {
+        font-family: 'Toast_icons';
+        src: url(data:application/x-font-ttf;charset=utf-8;base64,AAEAAAAKAIAAAwAgT1MvMj0gSRkAAAEoAAAAVmNtYXDnM+eRAAABsAAAAEpnbHlmzVnmlwAAAhgAAAZAaGVhZBEYIl8AAADQAAAANmhoZWEHlgN3AAAArAAAACRobXR4LvgAAAAAAYAAAAAwbG9jYQnUCGIAAAH8AAAAGm1heHABHQBcAAABCAAAACBuYW1lfUUTYwAACFgAAAKpcG9zdAxfTDgAAAsEAAAAggABAAADUv9qAFoEAAAAAAAD6AABAAAAAAAAAAAAAAAAAAAADAABAAAAAQAACcU5MF8PPPUACwPoAAAAANcI7skAAAAA1wjuyQAAAAAD6APoAAAACAACAAAAAAAAAAEAAAAMAFAABwAAAAAAAgAAAAoACgAAAP8AAAAAAAAAAQPqAZAABQAAAnoCvAAAAIwCegK8AAAB4AAxAQIAAAIABQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUGZFZABA5wDnCgNS/2oAWgPoAJYAAAABAAAAAAAABAAAAAPoAAAD6AAAA+gAAAPoAAAD6AAAA+gAAAPoAAAD6AAAA+gAAAPoAAAD6AAAAAAAAgAAAAMAAAAUAAMAAQAAABQABAA2AAAABAAEAAEAAOcK//8AAOcA//8AAAABAAQAAAABAAIAAwAEAAUABgAHAAgACQAKAAsAAAAAAAAAQgB8AMIA4gEcAZQCBgJwAo4DAAMgAAAAAwAAAAADlAOUAAsAFwAjAAABFwcXNxc3JzcnBycFDgEHLgEnPgE3HgEFHgEXPgE3LgEnDgEBTXh4L3h4L3h4L3h4AbwDt4qKtwMDt4qKt/0eBeuxsesFBeuxsesCbHh4L3h4L3h4L3h4p4q3AwO3ioq3AwO3irHrBQXrsbHrBQXrAAAAAwAAAAADlAOUAAUAEQAdAAABJwcXAScXDgEHLgEnPgE3HgEFHgEXPgE3LgEnDgEBr2UylwEbMqADt4qKtwMDt4qKt/0eBeuxsesFBeuxsesBrGQylgEcMqKKtwMDt4qKtwMDt4qx6wUF67Gx6wUF6wAAAAAFAAAAAAOUA5cABQARAB0AIQAlAAABFzcnNSMFDgEHLgEnPgE3HgEFHgEXPgE3LgEnDgElFzcnBRc3JwHKxiCnPwFOA6V8fKUDA6V8fKX9aATToJ/UBATUn5/UAh7ANsD9fja/NQGedzNj29F8pAMDpHx8pQMDpXyf1AQE1J+g0wQE0/GhQKGhQKFAAAQAAAAAA74DfgADAAcACgANAAAlMzUjNTM1IwEhCQEhAQHLUlJSUgFj/YwBOv42A5T+NuZUUqf+igIc/ZADFgAEAAAAAAOUA5QAAwAHABMAHwAAATM1IzUzNSMFDgEHLgEnPgE3HgEFHgEXPgE3LgEnDgEBylRUVFQBbgO3ioq3AwO3ioq3/R4F67Gx6wUF67Gx6wEk+lNT0Iq3AwO3ioq3AwO3irHrBQXrsbHrBQXrAAAAAAcAAAAAA+gDMQALABUAJQAuADcAQQBLAAABFhcVITUmJz4BMxYFFhcVITU+ATcWJQYHFSE1LgEjIgYHLgEjIgEWFAYiJjQ2MgUWFAYiJjQ2MiUGFBYXPgE0JiIFBhQWFz4BNCYiA1xEBP6sAxUeRiRX/qxEBP45BIlXV/7xZQsD6AvKUypvMzNvKlMCKxozTTMzTP6CGTNMNDRMAQItWUREWlqI/jstWkREWVmIAWMbFjc3IBgKDwQcGxY3NxY3BAQjJUt7e0tKFxgYFwEMGU01NU0zGhlNNTVNMxYthloCAlqGWy4thloCAlqGWwAAAAQAAAAAA5wCxwAIABQANABFAAABFBYyNjQmIgYXDgEHLgEnPgE3HgEfAQcOAQ8BNz4BNS4BJw4BBxQWHwEnLgEvATc+ATc2FiUOAQ8BFx4BNz4BPwEnJiciAb8fLR4eLR+wAkU0NEUBAUU0NEX8BgEemG0FBB8kAlZBQFcBKyUCCkeVTAYBH76RVMP+3bDPBwcKZclcu/AGCwrM2AoBxxYfHy0eHhc0RQEBRTQ1RQEBRSgEARpWGAECFUIoQVcCAldBLEYUAQEIQkAGASJsBwFCoRbFFAoJW0sBCo8LCgztAQAAAAIAAAAAA4ADbAA4AEEAAAEEJCcmDgEWFx4BHwEVFAYHDgEnJg4BFhcWNjc2Fx4BBx4BFzc+ASc2JicmJzUzPgE3PgEnJicjIiUUFjI2NCYiBgNM/tz+pwwMGxEDDAaMfAcSETKEQw8WBg8Og80hNSg4JwICEw0FDhECAjFJEBICPYhKDQgGChQCB/5dMUgxMUgxAuB/ZRcIAxgbCQdHEQGTGi8TOVgKAw8dFwMNuDUFHTGDCA0QAQECFQ8Mnz8LCasJKiUHGg0SATMkMDBJMDAAAAAAAgAAAAAC/QMkAAMADQAAAQchJxMeATMhMjY3EyEC2x3+bB0kBCQZAQQZJARH/ewDBuDg/fcZICAZAicAAwAAAAACzwPoACwAQwBPAAABERQfARYfAzMVHgE7ATI2NRE0JisBNTEWOwEyNjQmJyMiJi8BLgErAQ4BAxUzNTQ2NzMeARcVMzUuAScjIgcjESM1HgEXPgE3LgEnDgEBVQEBAwQCCAjXARENOg0REQ2zDROVExoaE2UQGAQfAxAKYg0RPR8RDZcNEQEeASIalxANAR8CTTo6TQEBTTo6TQJ8/nYEBQIGBAIFArYNERENARENEUoNGicZARMPfQoNARH98Hl5DREBARENeXkaIgEIAe3FOk0CAk06Ok0BAU0AAAAAAgAAAAAC5gMyAAkAEQAAJRQWMyEyNjURITcjFSE1IycjASApHgEaHin+WFBuAeR+JLD8HigoHgGfeT09HgAAAAAAEgDeAAEAAAAAAAAAAQAAAAEAAAAAAAEAEgABAAEAAAAAAAIABwATAAEAAAAAAAMAEgAaAAEAAAAAAAQAEgAsAAEAAAAAAAUACwA+AAEAAAAAAAYAEgBJAAEAAAAAAAoALABbAAEAAAAAAAsAEgCHAAMAAQQJAAAAAgCZAAMAAQQJAAEAJACbAAMAAQQJAAIADgC/AAMAAQQJAAMAJADNAAMAAQQJAAQAJADxAAMAAQQJAAUAFgEVAAMAAQQJAAYAJAErAAMAAQQJAAoAWAFPAAMAAQQJAAsAJAGnIEZpbmFsIFRvYXN0IE1ldHJvcFJlZ3VsYXJGaW5hbCBUb2FzdCBNZXRyb3BGaW5hbCBUb2FzdCBNZXRyb3BWZXJzaW9uIDEuMEZpbmFsIFRvYXN0IE1ldHJvcEZvbnQgZ2VuZXJhdGVkIHVzaW5nIFN5bmNmdXNpb24gTWV0cm8gU3R1ZGlvd3d3LnN5bmNmdXNpb24uY29tACAARgBpAG4AYQBsACAAVABvAGEAcwB0ACAATQBlAHQAcgBvAHAAUgBlAGcAdQBsAGEAcgBGAGkAbgBhAGwAIABUAG8AYQBzAHQAIABNAGUAdAByAG8AcABGAGkAbgBhAGwAIABUAG8AYQBzAHQAIABNAGUAdAByAG8AcABWAGUAcgBzAGkAbwBuACAAMQAuADAARgBpAG4AYQBsACAAVABvAGEAcwB0ACAATQBlAHQAcgBvAHAARgBvAG4AdAAgAGcAZQBuAGUAcgBhAHQAZQBkACAAdQBzAGkAbgBnACAAUwB5AG4AYwBmAHUAcwBpAG8AbgAgAE0AZQB0AHIAbwAgAFMAdAB1AGQAaQBvAHcAdwB3AC4AcwB5AG4AYwBmAHUAcwBpAG8AbgAuAGMAbwBtAAAAAAIAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAECAQMBBAEFAQYBBwEIAQkBCgELAQwBDQAFRXJyb3IHU3VjY2VzcwVBbGFybQdXYXJuaW5nBEluZm8HTWVldGluZwVCbGluawdTdHJldGNoA1NpcANTaXQFVHJhc2gAAAAA) format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    #toast_types button {
+        margin: 5px;
+        min-width: 160px;
+        max-width: 160px;
+    }
+
+    .toast-icons {
+        font-family: 'Toast_icons' !important;
+        speak: none;
+        font-size: 55px;
+        font-style: normal;
+        font-weight: normal;
+        font-variant: normal;
+        text-transform: none;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    #toast_type .e-toast-icon.e-icons {
+        height: auto;
+        font-size: 30px;
+    }
+
+    .bootstrap5 #toast_type .e-toast-icon.e-icons,
+    .bootstrap5-dark #toast_type .e-toast-icon.e-icons {
+        height: 25px;
+    }
+
+    .toast-icons.e-success::before {
+        content: "\e701";
+    }
+
+    .toast-icons.e-error::before {
+        content: "\e700";
+    }
+
+    .toast-icons.e-info::before {
+        content: "\e704";
+    }
+
+    .toast-icons.e-warning::before {
+        content: "\e703";
+    }
+
+    #toast_types {
+        text-align: center;
+    }
+
+    .content-wrapper {
+        width: 95%;
+        margin: 0 auto;
+        min-width: 85px;
+    }
+
+        .content-wrapper div.row {
+            padding: 15px 0px;
+        }
+</style>
